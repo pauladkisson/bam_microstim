@@ -21,6 +21,7 @@ function GenerateBAM(num_brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
     regular_y = (max_y - min_y) / num_group;
     group_idx = 0:num_group-1;
     for brain = 1:num_brains
+        rng(brain);
         ball_x = min_x + regular_x*group_idx+regular_x.*rand(1, num_group);
         ball_y = min_y + regular_y*group_idx+regular_y.*rand(1, num_group);
         ball_r = sqrt(ball_x.^2 + ball_y.^2);
@@ -29,34 +30,33 @@ function GenerateBAM(num_brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
         brainpath = strcat(sim_path, sprintf("/brain%0.0f", brain));
         mkdir(brainpath)
         save(strcat(brainpath, "/r.mat"), "ball_r", "electric_r")
+        
+        %figure;
+        %imagesc(adja)
+        %colorbar;
+        pulse_test_stim = -10*1e-6;
+        figure;
+        subplot(2, 1, 1)
+        scatter(ball_r*1e6, electric_r*pulse_test_stim*1e9)
+        title("Pulse Stimulation")
+        xlabel("Distance from Electrode to Neuron (um)")
+        ylabel("Stimulation Current (nA)")
+        subplot(2, 1, 2)
+        histogram(electric_r*pulse_test_stim*1e9, 48)
+        xlabel("Stimulation Current (nA)")
+        ylabel("Number of Neurons")
+
+        galvanic_test_stim = -100*1e-9;
+        figure;
+        subplot(2, 1, 1)
+        scatter(ball_r*1e6, electric_r*galvanic_test_stim*1e12)
+        title("Galvanic Stimulation")
+        xlabel("Distance from Electrode to Neuron (um)")
+        ylabel("Stimulation Current (pA)")
+        subplot(2, 1, 2)
+        histogram(electric_r*galvanic_test_stim*1e12, 24)
+        xlabel("Stimulation Current (pA)")
+        ylabel("Number of Neurons")
+        %}
     end
-    
-    %{
-    %figure;
-    %imagesc(adja)
-    %colorbar;
-    pulse_test_stim = -10*1e-6;
-    figure;
-    subplot(2, 1, 1)
-    scatter(ball_r*1e6, electric_r*pulse_test_stim*1e9)
-    title("Pulse Stimulation")
-    xlabel("Distance from Electrode to Neuron (um)")
-    ylabel("Stimulation Current (nA)")
-    subplot(2, 1, 2)
-    histogram(electric_r*pulse_test_stim*1e9, 48)
-    xlabel("Stimulation Current (nA)")
-    ylabel("Number of Neurons")
-    
-    galvanic_test_stim = -100*1e-9;
-    figure;
-    subplot(2, 1, 1)
-    scatter(ball_r*1e6, electric_r*galvanic_test_stim*1e12)
-    title("Galvanic Stimulation")
-    xlabel("Distance from Electrode to Neuron (um)")
-    ylabel("Stimulation Current (pA)")
-    subplot(2, 1, 2)
-    histogram(electric_r*galvanic_test_stim*1e12, 24)
-    xlabel("Stimulation Current (pA)")
-    ylabel("Number of Neurons")
-    %}
 end

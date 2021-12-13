@@ -28,7 +28,7 @@ num_group = floor(f*N_E);
 w_plus = 1.7; % Strength of "strong" synapses in the BAM network
 w_minus = 1 - f*(w_plus - 1)/(1-f); %Strength of "weak" synapses in BAM
 w = 1; %Strength of normal synapses in BAM
-num_brains = 1;
+num_brains = 2;
 GenerateBAM(num_brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path);
 GenerateConductances(N_E, N_I, sim_path)
 pop_type = ones(N, 1);

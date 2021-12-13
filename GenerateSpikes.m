@@ -16,6 +16,7 @@ function GenerateSpikes(fr_bg, max_fr_task, coherences, f, N_E, N_I, t_task, ...
         fr_tot1 = fr_bg + fr_task1;
         fr_tot2 = fr_bg + fr_task2;
         for trial = start_trial:end_trial
+            rng(trial);
             spikes = rand(length(t), N) < (dt*fr_bg);
             spikes(time_idx, g1_idx) = rand(sum(time_idx), num_group) < (dt*fr_tot1);
             spikes(time_idx, g2_idx) = rand(sum(time_idx), num_group) < (dt*fr_tot2);
