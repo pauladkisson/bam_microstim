@@ -2,7 +2,7 @@
 %%% 11.5.21
 %%% Purpose Generate micro-stimulation current
 function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
-                           pulse_amps, dc_amps, N, num_group, num_brains, ...
+                           pulse_amps, dc_amps, N, num_group, brains, ...
                            sim_path)
     I_ustim_base = zeros(length(t), N);
     dt = t(2) - t(1);
@@ -27,7 +27,7 @@ function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
             I_ustim_base = ones(length(t), N)*stim_amp;
         end
         I_ustim_base(t<t_task|t>t_taskoff, :) = 0;
-        for brain = 1:num_brains
+        for brain = brains
             brainpath = strcat(sim_path, sprintf("/brain%0.0f", brain));
             load(strcat(brainpath, "/r.mat"), "electric_r")
             I_ustim = [I_ustim_base(:, 1:num_group).*electric_r, zeros(length(t), N-num_group)];

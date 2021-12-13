@@ -1,4 +1,4 @@
-function GenerateBAM(num_brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
+function GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
     N = N_E + N_I;
     adja = w*ones(N, N);
     num_group = floor(f*N_E);
@@ -20,7 +20,7 @@ function GenerateBAM(num_brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
     regular_x = (max_x - min_x) / num_group;
     regular_y = (max_y - min_y) / num_group;
     group_idx = 0:num_group-1;
-    for brain = 1:num_brains
+    for brain = brains
         rng(brain);
         ball_x = min_x + regular_x*group_idx+regular_x.*rand(1, num_group);
         ball_y = min_y + regular_y*group_idx+regular_y.*rand(1, num_group);
@@ -31,6 +31,7 @@ function GenerateBAM(num_brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
         mkdir(brainpath)
         save(strcat(brainpath, "/r.mat"), "ball_r", "electric_r")
         
+        %{
         %figure;
         %imagesc(adja)
         %colorbar;
