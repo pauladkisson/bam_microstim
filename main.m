@@ -4,7 +4,7 @@
 %%% Adds Pulse-refractory period
 
 clear;
-sim_name = "Test";
+sim_name = "DirectoryFix";
 sim_path = sprintf("Simulation %s", sim_name);
 tic;
 load(strcat(sim_path, "/bam_constants.mat"))
@@ -19,11 +19,11 @@ for brain = brains
         if pulse
             fprintf("Pulse Stimulation Amplitude: %0.1fnA \n", stim_amp*1e9)
             input_stimpath = strcat(brainpath, sprintf("/ustim/%0.1fnA_pulse.mat", stim_amp*1e9));
-            output_stimpath = strcat(brainpath, sprintf("/data/%0.1fnA_pulse.mat", stim_amp*1e9));
+            output_stimpath = strcat(brainpath, sprintf("/data/%0.1fnA_pulse", stim_amp*1e9));
         else
             fprintf("Galvanic Stimulation Amplitude: %0.1fnA \n", stim_amp*1e9)
             input_stimpath = strcat(brainpath, sprintf("/ustim/%0.1fnA_galvanic.mat", stim_amp*1e9));
-            output_stimpath = strcat(brainpath, sprintf("/data/%0.1fnA_galvanic.mat", stim_amp*1e9));
+            output_stimpath = strcat(brainpath, sprintf("/data/%0.1fnA_galvanic", stim_amp*1e9));
         end
         load(input_stimpath)
         mkdir(output_stimpath)

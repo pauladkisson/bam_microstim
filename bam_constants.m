@@ -7,7 +7,7 @@ clear;
 tic;
 
 %% Simulation Parameters
-sim_name = "Test";
+sim_name = "DirectoryFix";
 sim_path = sprintf("Simulation %s", sim_name);
 mkdir(sim_path)
 dt = 0.05e-3; %ms
@@ -28,8 +28,8 @@ num_group = floor(f*N_E);
 w_plus = 1.7; % Strength of "strong" synapses in the BAM network
 w_minus = 1 - f*(w_plus - 1)/(1-f); %Strength of "weak" synapses in BAM
 w = 1; %Strength of normal synapses in BAM
-start_brain = 2;
-end_brain = 3;
+start_brain = 1;
+end_brain = 1;
 brains = start_brain:end_brain;
 GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path);
 GenerateConductances(N_E, N_I, sim_path)
