@@ -25,6 +25,7 @@ for brain = brains
                 [sim_name, brain, stim_amp*1e9]);
         end
         decisions = zeros(num_trials, length(coherences)); %0 for no decision, 1 for C1, 2 for C2
+        final_decisions = zeros(num_trials, length(coherences));
         decision_times = zeros(num_trials, length(coherences));
         avg_dts = zeros(length(coherences), 1);
         std_dts = zeros(length(coherences), 1);
@@ -33,6 +34,7 @@ for brain = brains
         avg_incorrect_dts = zeros(length(coherences), 1);
         std_incorrect_dts = zeros(length(coherences), 1);
         avg_acc = zeros(length(coherences), 1);
+        avg_final_acc = zeros(length(coherences), 1);
         percent_nodec = zeros(length(coherences), 1);
         percent_earlydec = zeros(length(coherences), 1);
         tot_frs = zeros(length(coherences), num_trials, length(t), 4);
@@ -89,6 +91,7 @@ for brain = brains
                     decision_times(relative_trial, i) = t(decision_idx) - t_task;
                 end
                 tot_frs(i, relative_trial, :, :) = pop_frs;
+                final_decisions(relative_trial, i) = get_final_decision(pop_frs);
             end
             %omit trials with no decision & those that decide before onset of task-related input
             coherent_times = decision_times(decisions(:, i)~=0 & decision_times(:, i)>0, i);
@@ -99,6 +102,9 @@ for brain = brains
             avg_acc(i) = sum(coherent_decisions == 1) / length(coherent_decisions);
             percent_nodec(i) = sum(decisions(:, i)==0, 'all') / end_trial;
             percent_earlydec(i) = sum(decision_times(:, i)<=0, 'all') / end_trial;
+            coherent_fin_decs = final_decisions(decisions(:, i)~=0);
+            avg_final_acc(i) = sum(coherent_fin_decs == 1) / length(coherent_fin_decs);
+            
 
             %Breakdown DTs by outcome
             avg_correct_dts(i) = mean(coherent_times(coherent_decisions==1));
@@ -198,6 +204,18 @@ function [decision, decision_idx] = get_decision(pop_frs)
     else
         decision = 2;
         decision_idx = decision2_idx;
+    end
+end
+
+function final_decision = get_final_decision(pop_frs)
+    decision_thresh = 15; %Hz
+    if pop_frs(end, 1) < decision_thresh && pop_frs(end, 2) < decision_thresh || ...
+            (pop_frs(end, 1) >= decision_thresh && pop_frs(end, 2) >= decision_thresh)%no decision
+        final_decision = 0;
+    elseif pop_frs(end, 1) >= decision_thresh
+        final_decision = 1;
+    else
+        final_decision = 2;
     end
 end
 
