@@ -46,6 +46,7 @@ end
 linkaxes(axs)
 %}
 
+%{
 % Spatial Electrode Effects
 min_x = sqrt(50*1e-12); %minimum distance of 10um
 max_x = 2*1e-3; %From Levitt et al.
@@ -92,4 +93,39 @@ for brain = brains
                 [stim_amp*1e9]))
         end
     end
+%}
+
+%Accuracies
+c = 0:0.01:1;
+figure;
+hAx = axes;
+hAx.XScale = 'log';
+hold on
+idx = 1;
+fig_leg = [];
+for j = 1:length(stim_amps)
+    stim_amp = stim_amps(j);
+    pulse = j <= length(pulse_amps);
+    if pulse
+        datapath = sprintf("Simulation %0.0f/data/%0.0fnA_pulse", ...
+            [sim_num, stim_amp*1e9]);
+        fig_leg = [fig_leg, sprintf("%0.0fnA Pulse", stim_amp*1e9)];
+    else
+        datapath = sprintf("Simulation %0.0f/data/%0.0fnA_galvanic", ...
+            [sim_num, stim_amp*1e9]);
+        fig_leg = [fig_leg, sprintf("%0.0fnA Galvanic", stim_amp*1e9)];
+    end
+    load(strcat(datapath, "/decisions.mat"), "avg_acc", "decisions");
+    %coeffs
+    %scatter(coherences, avg_acc, dc_colors(idx))
+    %plot(c, weibull(coeffs, c), dc_colors(idx))
+    plot(coherences, avg_acc, 'o-')
+end
+hold off
+xlabel("Coherence")
+ylabel("Accuracy")
+legend(fig_leg)
+%f = flipud(get(gca, 'Children'));
+%legend([f(2), f(4), f(6)], "I-dc=-4pA", "I-dc=0pA", "I-dc=4pA")
+%legend(compose("I-dc=%0.0fpA", I_dcs(1, :)*1e12))
 end

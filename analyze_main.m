@@ -2,21 +2,25 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "Test";
+sim_name = "EMBC";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 %t = 0:0.02e-3:t_span;
 %stim_amps = [-550, 0, 550]*1e-12;
 trials = start_trial:end_trial;
 num_trials = length(trials);
+brains = 1:2;
 for brain = brains
+    fprintf("Brain %0.0f \n", brain)
     for k = 1:length(stim_amps)
         stim_amp = stim_amps(k);
         pulse = k <= length(pulse_amps);
         if pulse
+            fprintf("Pulse Stimulation Amplitude: %0.1fnA \n", stim_amp*1e9)
             output_stimpath = sprintf("Simulation %s/brain%0.0f/data/%0.1fnA_pulse", ...
                 [sim_name, brain, stim_amp*1e9]);
         else
+            fprintf("Galvanic Stimulation Amplitude: %0.1fnA \n", stim_amp*1e9)
             output_stimpath = sprintf("Simulation %s/brain%0.0f/data/%0.1fnA_galvanic", ...
                 [sim_name, brain, stim_amp*1e9]);
         end
