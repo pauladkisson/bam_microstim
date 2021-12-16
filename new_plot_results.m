@@ -203,12 +203,18 @@ for brain = brains
         if pulse
             datapath = sprintf("Simulation %s/brain%0.0f/data/%0.1fnA_pulse", ...
                 [sim_name, brain, stim_amp*1e9]);
+            stim_coherences = pulse_coherences;
             if brain == 1
                 fig_leg = [fig_leg, sprintf("%0.1fnA Pulse", stim_amp*1e9)];
             end
         else
             datapath = sprintf("Simulation %s/brain%0.0f/data/%0.1fnA_galvanic", ...
                 [sim_name, brain, stim_amp*1e9]);
+            if stim_amp == 0
+                stim_coherences = control_coherences;
+            else
+                stim_coherences = galvanic_coherences;
+            end
             if brain == 1
                 fig_leg = [fig_leg, sprintf("%0.1fnA Galvanic", stim_amp*1e9)];
             end
