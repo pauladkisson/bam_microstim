@@ -2,7 +2,7 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "EMBC";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 %t = 0:0.02e-3:t_span;
@@ -21,10 +21,16 @@ for brain = brains
             fprintf("Pulse Stimulation Amplitude: %0.1fnA \n", stim_amp*1e9)
             output_stimpath = sprintf("Simulation %s/brain%0.0f/data/%0.1fnA_pulse", ...
                 [sim_name, brain, stim_amp*1e9]);
+            coherences = pulse_coherences;
         else
             fprintf("Galvanic Stimulation Amplitude: %0.1fnA \n", stim_amp*1e9)
             output_stimpath = sprintf("Simulation %s/brain%0.0f/data/%0.1fnA_galvanic", ...
                 [sim_name, brain, stim_amp*1e9]);
+            if stim_amp == 0
+                coherences = control_coherences;
+            else
+                coherences = galvanic_coherences;
+            end
         end
         decisions = zeros(num_trials, length(coherences)); %0 for no decision, 1 for C1, 2 for C2
         final_decisions = zeros(num_trials, length(coherences));
