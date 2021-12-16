@@ -10,6 +10,8 @@ load(strcat(sim_path, "/bam_constants.mat"))
 trials = start_trial:end_trial;
 num_trials = length(trials);
 brains = 1:2;
+reconstruct = false;
+
 for brain = brains
     fprintf("Brain %0.0f \n", brain)
     for k = 1:length(stim_amps)
@@ -64,25 +66,29 @@ for brain = brains
             output_coherentpath = strcat(output_stimpath, sprintf("/c=%0.3f", c));
             for trial = start_trial:end_trial
                 output_trialpath = strcat(output_coherentpath, sprintf("/trial%0.0f.mat", trial));
-                load(output_trialpath, "recspikes")
                 relative_trial = trial - start_trial + 1;
-                spikes = zeros(length(t), N);
-                for nn = 1:N
-                    for spike_idx = recspikes(int2str(nn))
-                        spikes(spike_idx, nn) = 1;
+                if reconstruct
+                    load(output_trialpath, "recspikes")
+                    spikes = zeros(length(t), N);
+                    for nn = 1:N
+                        for spike_idx = recspikes(int2str(nn))
+                            spikes(spike_idx, nn) = 1;
+                        end
+                        if nn <= num_group
+                            totspikes_g1(i, nn+(num_group)*(relative_trial-1)) = length(recspikes(int2str(nn))) / t_span;
+                        elseif nn > num_group && nn <= 2*num_group
+                            totspikes_g2(i, (nn - num_group)+(num_group)*(relative_trial-1)) = length(recspikes(int2str(nn))) / t_span;
+                        elseif nn > 2*num_group && nn <= N_E
+                            totspikes_ns(i, (nn - 2*num_group)+(N_E-2*num_group)*(relative_trial-1)) = length(recspikes(int2str(nn))) / t_span;
+                        else
+                            totspikes_int(i, (nn - N_E)+N_I*(relative_trial-1)) = length(recspikes(int2str(nn))) / t_span;
+                        end
                     end
-                    if nn <= num_group
-                        totspikes_g1(i, nn+(num_group)*(relative_trial-1)) = length(recspikes(int2str(nn))) / t_span;
-                    elseif nn > num_group && nn <= 2*num_group
-                        totspikes_g2(i, (nn - num_group)+(num_group)*(relative_trial-1)) = length(recspikes(int2str(nn))) / t_span;
-                    elseif nn > 2*num_group && nn <= N_E
-                        totspikes_ns(i, (nn - 2*num_group)+(N_E-2*num_group)*(relative_trial-1)) = length(recspikes(int2str(nn))) / t_span;
-                    else
-                        totspikes_int(i, (nn - N_E)+N_I*(relative_trial-1)) = length(recspikes(int2str(nn))) / t_span;
-                    end
+                    [pop_frs, fr_vars] = spikes2popfrs(spikes, dt, p, f, N_E);
+                    save(output_trialpath, "pop_frs", "fr_vars", "recspikes")
+                else
+                    load(output_trialpath, "pop_frs")
                 end
-                [pop_frs, fr_vars] = spikes2popfrs(spikes, dt, p, f, N_E);
-                save(output_trialpath, "pop_frs", "fr_vars", "recspikes")
                 [decision, decision_idx] = get_decision(pop_frs);
                 decisions(relative_trial, i) = decision;
                 if decision_idx == -1
@@ -102,9 +108,8 @@ for brain = brains
             avg_acc(i) = sum(coherent_decisions == 1) / length(coherent_decisions);
             percent_nodec(i) = sum(decisions(:, i)==0, 'all') / end_trial;
             percent_earlydec(i) = sum(decision_times(:, i)<=0, 'all') / end_trial;
-            coherent_fin_decs = final_decisions(decisions(:, i)~=0);
+            coherent_fin_decs = final_decisions(final_decisions(:, i)~=0, i);
             avg_final_acc(i) = sum(coherent_fin_decs == 1) / length(coherent_fin_decs);
-            
 
             %Breakdown DTs by outcome
             avg_correct_dts(i) = mean(coherent_times(coherent_decisions==1));
@@ -173,8 +178,8 @@ for brain = brains
         avg_frs = mean(tot_frs, 2);
         std_frs = std(tot_frs, 0, 2);
         decisionpath = strcat(output_stimpath, "/decisions.mat");
-        save(decisionpath, "decisions", "decision_times", ...
-            "avg_dts", "std_dts", "avg_acc", "percent_nodec", "coeffs", ...
+        save(decisionpath, "decisions", "final_decisions", "decision_times", ...
+            "avg_dts", "std_dts", "avg_acc", "avg_final_acc", "percent_nodec", "coeffs", ...
             "avg_frs", "std_frs", "avg_correct_frs", "std_correct_frs", ...
             "avg_incorrect_frs", "std_incorrect_frs", ...
             "avg_nodec_frs", "std_nodec_frs", ...
