@@ -7,7 +7,7 @@ clear;
 tic;
 
 %% Simulation Parameters
-sim_name = "DirectoryFix";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 mkdir(sim_path)
 dt = 0.05e-3; %ms
@@ -40,10 +40,10 @@ pop_type(N_E+1:end) = 2; % population_type = 1 for pyr, 2 for int
 fr_bg = 2400;
 % Synaptic Conductance = [pyramidal, interneuron]
 G_ampa_ext = [2.1, 1.62]*1e-9; %nS
-%coherences = [3.2, 6.4, 12.8, 25.6, 51.2, 100] / 100;
-%coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, ...
-              %25.6, 51.2, 100] / 100;
-coherences = [-100] / 100;
+pulse_coherences = [-100, -72.4, -51.2, -25.6, 0, 25.6] / 100;
+galvanic_coherences = [-100, -51.2, -36.2, -25.6, 0, 25.6] / 100;
+control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
+coherences = union(union(pulse_coherences, galvanic_coherences), control_coherences, 'sorted');
 max_fr_task = 80;
 t_task = 1;
 t_taskoff = 3;

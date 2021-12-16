@@ -4,7 +4,7 @@
 %%% Adds Pulse-refractory period
 
 clear;
-sim_name = "DirectoryFix";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 tic;
 load(strcat(sim_path, "/bam_constants.mat"))
@@ -20,14 +20,21 @@ for brain = brains
             fprintf("Pulse Stimulation Amplitude: %0.1fnA \n", stim_amp*1e9)
             input_stimpath = strcat(brainpath, sprintf("/ustim/%0.1fnA_pulse.mat", stim_amp*1e9));
             output_stimpath = strcat(brainpath, sprintf("/data/%0.1fnA_pulse", stim_amp*1e9));
-        else
+            stim_coherences = pulse_coherences;
+        elseif stim_amp ~= 0
             fprintf("Galvanic Stimulation Amplitude: %0.1fnA \n", stim_amp*1e9)
             input_stimpath = strcat(brainpath, sprintf("/ustim/%0.1fnA_galvanic.mat", stim_amp*1e9));
             output_stimpath = strcat(brainpath, sprintf("/data/%0.1fnA_galvanic", stim_amp*1e9));
+            stim_coherences = galvanic_coherences;
+        else
+            disp("0nA Stimulation Control")
+            input_stimpath = strcat(brainpath, sprintf("/ustim/%0.1fnA_galvanic.mat", stim_amp*1e9));
+            output_stimpath = strcat(brainpath, sprintf("/data/%0.1fnA_galvanic", stim_amp*1e9));
+            stim_coherences = control_coherences;
         end
         load(input_stimpath)
         mkdir(output_stimpath)
-        for c = coherences
+        for c = stim_coherences
             fprintf("Coherence: %0.1f%% \n", c*100)
             input_coherentpath = sprintf("Simulation %s/spikes/c=%0.3f", sim_name, c);
             output_coherentpath = strcat(output_stimpath, sprintf("/c=%0.3f", c));
