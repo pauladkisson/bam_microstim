@@ -2,15 +2,22 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "Test";
+sim_name = "EMBC";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
-%t = 0:0.02e-3:t_span;
-%stim_amps = [-550, 0, 550]*1e-12;
+start_trial = 1;
+end_trial = 36;
 trials = start_trial:end_trial;
 num_trials = length(trials);
-brains = 1:2;
+brains = 1:10;
 reconstruct = false;
+pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
+control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
+galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+pulse_amps = [-10*1e-6];
+dc_amps = [-28, 0]*1e-9;
+stim_amps = [pulse_amps, dc_amps];
+%}
 
 for brain = brains
     fprintf("Brain %0.0f \n", brain)
@@ -28,6 +35,9 @@ for brain = brains
                 [sim_name, brain, stim_amp*1e9]);
             if stim_amp == 0
                 coherences = control_coherences;
+                if brain ~= 1
+                    continue
+                end
             else
                 coherences = galvanic_coherences;
             end
@@ -35,6 +45,7 @@ for brain = brains
         decisions = zeros(num_trials, length(coherences)); %0 for no decision, 1 for C1, 2 for C2
         final_decisions = zeros(num_trials, length(coherences));
         decision_times = zeros(num_trials, length(coherences));
+        final_decision_times = zeros(num_trials, length(coherences));
         avg_dts = zeros(length(coherences), 1);
         std_dts = zeros(length(coherences), 1);
         avg_correct_dts = zeros(length(coherences), 1);
@@ -98,12 +109,18 @@ for brain = brains
                 [decision, decision_idx] = get_decision(pop_frs);
                 decisions(relative_trial, i) = decision;
                 if decision_idx == -1
-                    decision_times(relative_trial, i) = Inf;
+                    decision_times(relative_trial, i) = NaN;
                 else
                     decision_times(relative_trial, i) = t(decision_idx) - t_task;
                 end
                 tot_frs(i, relative_trial, :, :) = pop_frs;
-                final_decisions(relative_trial, i) = get_final_decision(pop_frs);
+                [final_dec, final_dec_idx] = get_final_decision(pop_frs);
+                final_decisions(relative_trial, i) = final_dec;
+                if final_dec_idx == -1
+                    final_decision_times(relative_trial, i) = NaN;
+                else
+                    final_decision_times(relative_trial, i) = t(final_dec_idx) - t_task;
+                end
             end
             %omit trials with no decision & those that decide before onset of task-related input
             coherent_times = decision_times(decisions(:, i)~=0 & decision_times(:, i)>0, i);
@@ -179,12 +196,12 @@ for brain = brains
         dec_thresh_idx(2, :) = [c_idx, trial_idx];
 
         %Fit to weibull FN
-        %coeffs = lsqcurvefit(@weibull, [1e-9, 0], coherences, avg_acc');
+        %coeffs = lsqcurvefit(@weibull, [1, 1, 1], coherences, avg_acc');
         coeffs = [1e-9, 0];
         avg_frs = mean(tot_frs, 2);
         std_frs = std(tot_frs, 0, 2);
         decisionpath = strcat(output_stimpath, "/decisions.mat");
-        save(decisionpath, "decisions", "final_decisions", "decision_times", ...
+        save(decisionpath, "decisions", "final_decisions", "decision_times", "final_decision_times", ...
             "avg_dts", "std_dts", "avg_acc", "avg_final_acc", "percent_nodec", "coeffs", ...
             "avg_frs", "std_frs", "avg_correct_frs", "std_correct_frs", ...
             "avg_incorrect_frs", "std_incorrect_frs", ...
@@ -218,15 +235,18 @@ function [decision, decision_idx] = get_decision(pop_frs)
     end
 end
 
-function final_decision = get_final_decision(pop_frs)
+function [final_decision, final_dec_idx] = get_final_decision(pop_frs)
     decision_thresh = 15; %Hz
     if pop_frs(end, 1) < decision_thresh && pop_frs(end, 2) < decision_thresh || ...
             (pop_frs(end, 1) >= decision_thresh && pop_frs(end, 2) >= decision_thresh)%no decision
         final_decision = 0;
+        final_dec_idx = -1;
     elseif pop_frs(end, 1) >= decision_thresh
         final_decision = 1;
+        final_dec_idx = find(pop_frs(:, 1)>=decision_thresh, 1);
     else
         final_decision = 2;
+        final_dec_idx = find(pop_frs(:, 2)>=decision_thresh, 1);
     end
 end
 
