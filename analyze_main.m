@@ -2,16 +2,18 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "EMBC Disconnected";
+sim_name = "DepolBlockDiscon";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 
+%{
 start_trial = 1;
 end_trial = 36;
+brains = 1:10;
+%}
 trials = start_trial:end_trial;
 num_trials = length(trials);
-brains = 1:10;
-reconstruct = false;
+reconstruct = true;
 num_batch = 3;
 batch_size = floor(length(trials) / num_batch);
 logistic_regression = false;

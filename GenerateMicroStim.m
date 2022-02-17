@@ -48,6 +48,7 @@ function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
                 save(strcat(basepath, sprintf("/%0.1fnA_galvanic.mat", stim_amp*1e9)), "I_ustim")
             end
         end
+        %{
         true_amps = I_ustim(t==t_task, 1:num_group);
         figure;
         hold on
@@ -63,5 +64,6 @@ function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
             yline(depol_block_thresh*1e9, 'r--')
             legend(["", "Depolarization Block Threshold"])
         end
+        %}
     end
 end

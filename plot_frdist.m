@@ -44,6 +44,8 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
             end
             for trial = start_trial:end_trial
                 relative_trial = trial - start_trial + 1;
+                relative_trial
+                stim_coherences==ex_c
                 if (final_decisions(relative_trial, stim_coherences==ex_c) ~= 1 && plot_name == "p1_wins") || ...
                         (final_decisions(relative_trial, stim_coherences==ex_c) ~= 2 && plot_name == "p1_loses")
                     continue

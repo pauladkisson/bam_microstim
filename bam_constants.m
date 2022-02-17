@@ -34,8 +34,8 @@ num_group = floor(f*N_E);
 w_plus = 0;
 w_minus = 0;
 w = 0;
-start_brain = 1;
-end_brain = 1;
+start_brain = 2;
+end_brain = 10;
 brains = start_brain:end_brain;
 GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path);
 GenerateConductances(N_E, N_I, sim_path)
@@ -83,7 +83,7 @@ stim_freq = 200; %Hz
 depol_block_thresh = 800*1e-12;
 depol_block_factor = 3;
 pulse_amps = [-10*1e-6];
-dc_amps = [-28, 0]*1e-9;
+dc_amps = [-28]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
                   depol_block_thresh, depol_block_factor, pulse_amps, ...

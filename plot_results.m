@@ -1,21 +1,21 @@
 %clear;
-sim_name = "EMBC I_b100";
+sim_name = "DepolBlockDiscon";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 figure;
 default_colors = get(gca, "colororder");
 start_trial = 1;
-end_trial = 36;
+end_trial = 1;
 num_trials = end_trial - start_trial + 1;
 brains = 1:10;
 num_brains = length(brains);
 num_batch = 3;
-
+%{
 pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
 control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
 galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
 %}
-%{
+
 pulse_coherences = [0];
 control_coherences = [0];
 galvanic_coherences = [0];
@@ -77,11 +77,10 @@ plot_sync(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, num_group, ...
           start_trial, end_trial, num_trials)
 %}
 
-%{
-win_start = t_task;
-win_stop = t_task + 0.1;
+
+win_start = t_task + stim_ind*dt; % + stim_ind*dt to account for onset spike of pulse
+win_stop = t_task + 0.1 + stim_ind*dt;
 ex_c = 0;
-sim_name = "EMBC Disconnected";
 %  plot_name = 'ex_c' or 'p1_wins' or 'p1_loses'
 plot_name = "ex_c";
 plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_start, ...
@@ -90,6 +89,8 @@ plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_start, ...
                      start_trial, end_trial, num_trials, plot_name);
 %}
 
+%{
 plot_decisions(sim_name, pulse_amps, stim_amps, default_colors, brains, ...
                num_brains, num_batch, ...
                pulse_coherences, galvanic_coherences, control_coherences)
+%}
