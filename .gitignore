@@ -1,3 +1,8 @@
 Simulation*
 ._*
 *.asv
+Figures*
+.ipynb*
+matdata*
+*.zip
+Thia's Data*

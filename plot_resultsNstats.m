@@ -1,5 +1,5 @@
 clear;
-sim_name = "EMBC";
+sim_name = "EMBC I_b100";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 default_colors = get(gca, "colororder");
@@ -11,16 +11,50 @@ num_brains = length(brains);
 pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
 control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
 galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+common_coherences = [-100, -51.2, -25.6, 0, 25.6] / 100;
 pulse_amps = [-10*1e-6];
 dc_amps = [-28, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 ex_c = 25.6/100;
 ex_trial = 1;
 ex_brain = 1;
+num_batch = 3;
+
+%{
+%Single stim modality ex frs
+ex_stim_j = 1;
+stim_amp = stim_amps(ex_stim_j);
+pulse = ex_stim_j<=length(pulse_amps);
+if pulse
+    output_stimpath = sprintf("Simulation %s/brain%0.0f/data/%0.1fnA_pulse", ...
+        [sim_name, ex_brain, stim_amp*1e9]);
+elseif stim_amp == 0
+    output_stimpath = sprintf("Simulation %s/brain1/data/%0.1fnA_galvanic", ...
+        [sim_name, stim_amp*1e9]);
+else
+    output_stimpath = sprintf("Simulation %s/brain%0.0f/data/%0.1fnA_galvanic", ...
+        [sim_name, ex_brain, stim_amp*1e9]);
+end
+load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [ex_c, ex_trial])), "pop_frs")
+figure;
+set(gca, 'fontsize', 18)
+hold on
+for i = 1:p+2
+    plot(t, pop_frs(:, i))
+end
+xline(t_task, "g--")
+xline(t_taskoff, "r--")
+hold off
+xlabel("Time (s)")
+ylabel("Population Firing Rate (Hz)")
+legend(["", "", "", "", "Stimulation On", "Stimulation Off"], ...
+    "Location", "northwest")
+%}
 
 %{
 %Example FRs
 figure;
+set(gca, 'fontsize', 14)
 axs = zeros(length(stim_amps), 1);
 for j = 1:length(stim_amps)
     stim_amp = stim_amps(j);
@@ -60,8 +94,7 @@ for j = 1:length(stim_amps)
     elseif j == ceil(length(stim_amps)/2)
         ylabel("Population Firing Rate (Hz)")
     elseif j == 1
-        legend([compose("Selective Population %0.0f", 1:p), "Non-Selective", "Inhibitory", "Stimulation On", "Stimulation Off"], ...
-            "Location", "northwest", 'FontSize', 6)
+         legend("P1", "P2", "NS", "Int", "Stim On", "Stim Off", 'location', 'northwest')
     end
 end
 linkaxes(axs)
@@ -94,8 +127,8 @@ for j = 1:length(stim_amps)
     
     [g1_time_idx, g1_neuron_idx, g1_idx] = get_spike_idx(spikes);
     
-    figure(p1_only);
     subplot(length(stim_amps), 1, j)
+    set(gca, 'fontsize', 20)
     scatter(t(g1_time_idx), ball_r(g1_idx(g1_neuron_idx))*1e6, "Marker", "|", ...
         "MarkerFaceColor", default_colors(1, :), "MarkerEdgeColor", default_colors(1, :))
     if j == length(stim_amps)
@@ -113,6 +146,7 @@ for j = 1:length(stim_amps)
         end
     end
 end
+set(findall(gcf,'-property','FontSize'),'FontSize', 14)
 %}
 
 %{
@@ -187,15 +221,25 @@ for j = 1:length(stim_amps)
     end
 end
 top_N = num_group;
+set(gca, 'fontsize', 14)
 figure;
 hold on
 scatter(ball_r(1:top_N)*1e6, g1_taskfrs(1:top_N, 1), [], ones(top_N, 3).*default_colors(7, :), 'filled')
 scatter(ball_r(1:top_N)*1e6, g1_taskfrs(1:top_N, 2), [], ones(top_N, 3).*default_colors(5, :), 'filled')
 scatter(ball_r(1:top_N)*1e6, g1_taskfrs(1:top_N, 3), [], "k", 'filled')
-hold off
+%hold off
 xlabel("Distance from Electrode (um)")
 ylabel("End of Task Firing Rate (Hz)")
 legend(["Pulsatile", "Galvanic", "Control"])
+
+%Quantify how many neurons are affected by each stim modality
+g1_stds = std(g1_taskfrs, [], 1)
+g1_means = mean(g1_taskfrs, 1);
+g1_affected = g1_taskfrs > g1_means + g1_stds | g1_taskfrs < g1_means - g1_stds;
+g1_percent_affected = sum(g1_affected, 1) ./ num_group
+g1_affected_meanfrs = [mean(g1_taskfrs(g1_affected(:, 1), 1)), mean(g1_taskfrs(g1_affected(:, 2), 2))]
+triple_ball_r = [ball_r, ball_r, ball_r];
+scatter(triple_ball_r(g1_affected)*1e6, g1_taskfrs(g1_affected), 100, 'ro')
 %}
 
 %{
@@ -247,12 +291,18 @@ for brain = brains
     end
 %}
 
-
+%{
 %Final Accuracies
 pulse_acc = zeros(length(brains), length(pulse_coherences));
 galvanic_acc = zeros(length(brains), length(galvanic_coherences));
 ctrl_acc = zeros(1, length(control_coherences));
+pulse_coeffs = zeros(length(brains), 2);
+galvanic_coeffs = zeros(length(brains), 2);
+ctrl_coeffs = zeros(num_batch, 2);
 c = -1:0.01:1;
+w_pulse = zeros(length(brains), length(c));
+w_galvanic = zeros(length(brains), length(c));
+w_ctrl = zeros(num_batch, length(c));
 for brain = brains
     for j = 1:length(stim_amps)
         stim_amp = stim_amps(j);
@@ -273,7 +323,7 @@ for brain = brains
                 [sim_name, brain, stim_amp*1e9]);
             stim_coherences = galvanic_coherences;
         end
-        load(strcat(datapath, "/decisions.mat"), "avg_final_acc", "final_decisions");
+        load(strcat(datapath, "/decisions.mat"), "avg_final_acc", "final_decisions", "coeffs", "batch_coeffs");
         [nodec_trial, nodec_c] = find(~final_decisions);
         for nodec = 1:length(nodec_trial)
             fprintf("Brain %0.0f, c=%0.3f, trial = %0.0f \n", ...
@@ -281,33 +331,64 @@ for brain = brains
         end
         if pulse
             pulse_acc(brain, :) = avg_final_acc;
+            pulse_coeffs(brain, :) = coeffs;
+            w_pulse(brain, :) = logistic_acc(coeffs, c);
         elseif stim_amp == 0
             ctrl_acc = avg_final_acc;
+            ctrl_coeffs = batch_coeffs;
+            true_ctrl_coeffs = coeffs;
+            for batch = 1:num_batch
+                w_ctrl(batch, :) = logistic_acc(batch_coeffs(batch, :), c);
+            end
         else
             galvanic_acc(brain, :) = avg_final_acc;
+            galvanic_coeffs(brain, :) = coeffs;
+            w_galvanic(brain, :) = logistic_acc(coeffs, c);
         end
     end
 end
 
 figure;
 hold on
-errorbar(pulse_coherences, mean(pulse_acc, 1), std(pulse_acc, [], 1)/sqrt(10), 'Color', default_colors(7, :))
-errorbar(galvanic_coherences, mean(galvanic_acc, 1), std(galvanic_acc, [], 1)/sqrt(10), 'Color', default_colors(5, :))
+errorbar(pulse_coherences, mean(pulse_acc, 1), std(pulse_acc, [], 1)/sqrt(num_brains), 'Color', default_colors(7, :))
+errorbar(galvanic_coherences, mean(galvanic_acc, 1), std(galvanic_acc, [], 1)/sqrt(num_brains), 'Color', default_colors(5, :))
 plot(control_coherences, ctrl_acc, 'ko-')
 scatter(pulse_coherences, pulse_acc', [], default_colors(7, :).*ones(length(pulse_acc), 3))
 scatter(galvanic_coherences, galvanic_acc', [], default_colors(5, :).*ones(length(pulse_acc), 3))
+plot(c, w_ctrl, "k")
+plot(c, w_galvanic, 'Color', default_colors(5, :))
+plot(c, w_pulse, 'Color', default_colors(7, :))
 hold off
 xlabel("Coherence (%)")
 ylabel("% of trials P1 wins")
 legend("Pulsatile", "Galvanic", "Control")
+
+
+%Stats
+beta0 = true_ctrl_coeffs(1);
+pulse_beta1 = pulse_coeffs(:, 1) - beta0;
+galvanic_beta1 = galvanic_coeffs(:, 1) - beta0;
+ctrl_beta1 = ctrl_coeffs(:, 1) - beta0;
+pulse_beta_ratio = pulse_beta1 ./ pulse_coeffs(:, 2);
+galvanic_beta_ratio = galvanic_beta1 ./ galvanic_coeffs(:, 2);
+ctrl_beta_ratio = ctrl_beta1 ./ ctrl_coeffs(:, 2);
+groups = [ones(num_brains, 1); 2*ones(num_brains, 1); 3*ones(3, 1)];
+beta_ratios = [pulse_beta_ratio; galvanic_beta_ratio; ctrl_beta_ratio];
+[~, p, stats] = anovan(beta_ratios, groups);
+c_val = multcompare(stats)
+figure;
+hold on
+scatter(rand(size(pulse_beta_ratio)), pulse_beta_ratio, [], default_colors(7, :).*ones(length(pulse_beta_ratio), 3))
+scatter(rand(size(galvanic_beta_ratio)), galvanic_beta_ratio, [], default_colors(5, :).*ones(length(galvanic_beta_ratio), 3))
+scatter(rand(size(ctrl_beta_ratio)), ctrl_beta_ratio, "k")
+hold off
 %}
 
-
+%{
 %Final Decision Times
 pulse_dt = zeros(length(brains), length(pulse_coherences));
 galvanic_dt = zeros(length(brains), length(galvanic_coherences));
 ctrl_dt = zeros(1, length(control_coherences));
-c = -1:0.01:1;
 for brain = brains
     for j = 1:length(stim_amps)
         stim_amp = stim_amps(j);
@@ -326,7 +407,6 @@ for brain = brains
                 [sim_name, brain, stim_amp*1e9]);
         end
         load(strcat(datapath, "/decisions.mat"), "final_decision_times", "final_decisions");
-        size(final_decisions)
         if pulse
             pulse_dt(brain, :) = mean(final_decision_times, 1, 'omitnan');
         elseif stim_amp == 0
@@ -348,7 +428,25 @@ hold off
 xlabel("Coherence (%)")
 ylabel("Decision Time (s)")
 legend("Pulsatile", "Galvanic", "Control")
+
+%Stats
+norm_pulse_dt = mean(pulse_dt, 2) - mean(ctrl_dt);
+norm_galvanic_dt = mean(galvanic_dt, 2) - mean(ctrl_dt);
+[~, p] = ttest2(norm_pulse_dt, norm_galvanic_dt)
+norm_pulse_dt_bar = mean(norm_pulse_dt)
+norm_galvanic_dt_bar = mean(norm_galvanic_dt)
+
+[~, peak_cidx_pulse] = max(pulse_dt, [], 2);
+[~, peak_cidx_galvanic] = max(galvanic_dt, [], 2);
+[~, peak_cidx_ctrl] = max(ctrl_dt, [], 2);
+peak_c_pulse = pulse_coherences(peak_cidx_pulse);
+peak_c_galvanic = galvanic_coherences(peak_cidx_galvanic);
+peak_c_ctrl = control_coherences(peak_cidx_ctrl);
+[~, p] = ttest2(peak_c_pulse, peak_c_galvanic)
+peak_c_pulse_bar = mean(peak_c_pulse)
+peak_c_galvanic_bar = mean(peak_c_galvanic)
 %}
+
 
 %{
 %Spike Timing Correlation 

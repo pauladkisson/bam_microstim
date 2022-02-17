@@ -1,300 +1,95 @@
-clear;
-sim_num = 2;
-sim_path = sprintf("Simulation %0.0f", sim_num);
+%clear;
+sim_name = "EMBC I_b100";
+sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
+figure;
 default_colors = get(gca, "colororder");
+start_trial = 1;
+end_trial = 36;
+num_trials = end_trial - start_trial + 1;
+brains = 1:10;
+num_brains = length(brains);
+num_batch = 3;
 
-%{
-%Example FRs
-ex_c = -51.2/100;
-ex_trial = 1;
-%ex_stim_amp = -10*1e-6;
-ex_stim_amp = -1*1e-9;
-pulse = false;
-if pulse
-    output_stimpath = sprintf("Simulation %0.0f/data/%0.0fnA_pulse", [sim_num, ex_stim_amp*1e9]);
-else
-    output_stimpath = sprintf("Simulation %0.0f/data/%0.0fnA_galvanic", ...
-        [sim_num, ex_stim_amp*1e9]);
-end
-load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [ex_c, ex_trial])), "pop_frs")
-figure;
-hold on
-for i = 1:p+2
-    plot(t, pop_frs(:, i))
-end
-hold off
-legend([compose("Selective Population %0.0f", 1:p), "Non-Selective", "Inhibitory"])
-title(sprintf("Coherence: %0.1f%%, Trial %0.0f", [ex_c*100, ex_trial]))
+pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
+control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
+galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
 %}
+%{
+pulse_coherences = [0];
+control_coherences = [0];
+galvanic_coherences = [0];
+%}
+pulse_amps = [-10*1e-6];
+dc_amps = [-28, 0]*1e-9;
+stim_amps = [pulse_amps, dc_amps];
 
 %{
-%Example Raster by pop-type and total activity 
-ex_trial = 1;
-default_colors = get(gca, 'colororder');
-ex_c = -1;
-for j = 1:length(stim_amps)
-    stim_amp = stim_amps(j);
-    pulse = j<=length(pulse_amps);
-    if sim_num >= 2
-        if pulse
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fnA_pulse", [sim_num, stim_amp*1e9]);
-        else
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fnA_galvanic", ...
-                [sim_num, stim_amp*1e9]);
-        end
-    else
-        if pulse
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fuA_pulse", [sim_num, stim_amp*1e6]);
-        else
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fpA_galvanic", ...
-                [sim_num, stim_amp*1e12]);
-        end
-    end
-    load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [ex_c, ex_trial])), ...
-        "recspikes", "pop_frs")
-    spikes = zeros(length(t), N);
-    neuron_num = 1:N;
-    for nn = 1:N
-        for spike_idx = recspikes(int2str(nn))
-            spikes(spike_idx, nn) = 1;
-        end
-    end
-    
-    g1_spikes = spikes(:, 1:num_group);
-    [g1_time_idx, g1_neuron_idx] = get_spike_idx(g1_spikes);
-    g2_spikes = spikes(:, num_group+1:2*num_group);
-    [g2_time_idx, g2_neuron_idx] = get_spike_idx(g2_spikes);
-    ns_spikes = spikes(:, 2*num_group+1:N_E);
-    [ns_time_idx, ns_neuron_idx] = get_spike_idx(ns_spikes);
-    int_spikes = spikes(:, N_E+1:end);
-    [int_time_idx, int_neuron_idx] = get_spike_idx(int_spikes);
-    
-    figure;
-    hold on
-    scatter(t(g1_time_idx), g1_neuron_idx, "Marker", "|", ...
-        "MarkerFaceColor", default_colors(1, :), "MarkerEdgeColor", default_colors(1, :))
-    scatter(t(g2_time_idx), num_group+g2_neuron_idx, "Marker", "|", ...
-        "MarkerFaceColor", default_colors(2, :), "MarkerEdgeColor", default_colors(2, :))
-    scatter(t(ns_time_idx), 2*num_group+ns_neuron_idx, "Marker", "|", ...
-        "MarkerFaceColor", default_colors(3, :), "MarkerEdgeColor", default_colors(3, :))
-    scatter(t(int_time_idx), N_E+int_neuron_idx, "Marker", "|", ...
-        "MarkerFaceColor", default_colors(4, :), "MarkerEdgeColor", default_colors(4, :))
-    xlabel("Time (s)")
-    ylabel("Ranked Neuron Activity")
-    legend(["Population 1", "Population 2", "Non-Selective", "Interneurons"])
-    if sim_num >= 2
-        if pulse
-            title(sprintf("%0.0fnA Pulse Stimulation, %0.1f%% Coherence", [stim_amp*1e9, ex_c*100]))
-        else
-            title(sprintf("%0.0fnA Galvanic Stimulation, %0.1f%% Coherence", [stim_amp*1e9, ex_c*100]))
-        end
-    else
-        if pulse
-            title(sprintf("%0.0fuA Pulse Stimulation, %0.1f%% Coherence", [stim_amp*1e6, ex_c*100]))
-        else
-            title(sprintf("%0.0fpA Galvanic Stimulation, %0.1f%% Coherence", [stim_amp*1e12, ex_c*100]))
-        end
-    end
-end
+ex_c = 0/100;
+ex_trial = 4;
+ex_brain = 1;
+ex_stim_j = 1;
+plot_name = "single_stim"; % or 'subplot' or 'p1_only'
+plot_frs(sim_name, pulse_amps, stim_amps, p, t, default_colors, ex_stim_j, ex_brain, ex_c, ex_trial, plot_name)
 %}
 
 %{
-%Example FRs with variance 
-ex_trial = 1;
-default_colors = get(gca, 'colororder');
-ex_c = -0.512;
-for j = 1:length(stim_amps)
-    stim_amp = stim_amps(j);
-    pulse = j<=length(pulse_amps);
-    if sim_num >= 2
-        if pulse
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fnA_pulse", [sim_num, stim_amp*1e9]);
-        else
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fnA_galvanic", ...
-                [sim_num, stim_amp*1e9]);
-        end
-    else
-        if pulse
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fuA_pulse", [sim_num, stim_amp*1e6]);
-        else
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fpA_galvanic", ...
-                [sim_num, stim_amp*1e12]);
-        end
-    end
-    load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [ex_c, ex_trial])), ...
-        "recspikes", "pop_frs")
-    spikes = zeros(length(t), N);
-    neuron_num = 1:N;
-    for nn = 1:N
-        for spike_idx = recspikes(int2str(nn))
-            spikes(spike_idx, nn) = 1;
-        end
-    end
-    [pop_frs, fr_vars] = spikes2popfrs(spikes, dt, p, f, N_E);
-    figure;
-    hold on
-    n_down = 20;
-    for i = 1:4
-        shadedErrorBar(t(1:n_down:end) , pop_frs(1:n_down:end, i), fr_vars(1:n_down:end, i), ...
-            'lineProps', {'Color', default_colors(i, :)})
-    end
-    hold off
-    xlabel("Time (s)")
-    ylabel("Firing Rate (Hz)")
-    legend(["Population 1", "Population 2", "Non-Selective", "Interneurons"])
-    if sim_num >= 2
-        if pulse
-            title(sprintf("%0.0fnA Pulse Stimulation, %0.1f%% Coherence", [stim_amp*1e9, ex_c*100]))
-        else
-            title(sprintf("%0.0fnA Galvanic Stimulation, %0.1f%% Coherence", [stim_amp*1e9, ex_c*100]))
-        end
-    else
-        if pulse
-            title(sprintf("%0.0fuA Pulse Stimulation, %0.1f%% Coherence", [stim_amp*1e6, ex_c*100]))
-        else
-            title(sprintf("%0.0fpA Galvanic Stimulation, %0.1f%% Coherence", [stim_amp*1e12, ex_c*100]))
-        end
-    end
-end
-%}
-
-%Total Spike Histograms
-ex_trial = 1;
-default_colors = get(gca, 'colororder');
-ex_c = 1;
-ex_c_idx = coherences == ex_c;
-figure;
-hold on
-axs = [];
-binEdges = 0:0.5:60;
-for j = 1:length(stim_amps)
-    stim_amp = stim_amps(j);
-    pulse = j<=length(pulse_amps);
-    if sim_num >= 2
-        if pulse
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fnA_pulse", [sim_num, stim_amp*1e9]);
-        else
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fnA_galvanic", ...
-                [sim_num, stim_amp*1e9]);
-        end
-    else
-        if pulse
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fuA_pulse", [sim_num, stim_amp*1e6]);
-        else
-            output_stimpath = sprintf("Simulation %0.0f/data/%0.0fpA_galvanic", ...
-                [sim_num, stim_amp*1e12]);
-        end
-    end
-    load(strcat(output_stimpath, "/decisions.mat"), ...
-        "totspikes_g1", "totspikes_g2", "totspikes_ns", "totspikes_int")
-    axs(j) = subplot(3, 1, j);
-    histogram(totspikes_g1(ex_c_idx, :), 'BinEdges', binEdges);
-    if pulse
-        title(sprintf("%0.0fnA Pulse Stimulation, %0.1f%% Coherence", [stim_amp*1e9, ex_c*100]))
-    else
-        title(sprintf("%0.0fnA Galvanic Stimulation, %0.1f%% Coherence", [stim_amp*1e9, ex_c*100]))
-    end
-    if j == length(stim_amps)
-        xlabel("Average Firing Rate (Hz)")
-    elseif j == 2
-        ylabel("Number of Neurons")
-    end
-end
-linkaxes(axs);
-hold off
-%}
-
-
-%{
-%Decision Times
-figure;
-hAx = axes;
-%hAx.XScale = 'log';
-hold on
-fig_leg = [];
-for j = 1:length(stim_amps)
-    stim_amp = stim_amps(j);
-    pulse = j <= length(pulse_amps);
-    if pulse
-        datapath = sprintf("Simulation %0.0f/data/%0.0fnA_pulse", ...
-            [sim_num, stim_amp*1e9]);
-        fig_leg = [fig_leg, sprintf("%0.0fnA Pulse", stim_amp*1e9)];
-    else
-        datapath = sprintf("Simulation %0.0f/data/%0.0fnA_galvanic", ...
-            [sim_num, stim_amp*1e9]);
-        fig_leg = [fig_leg, sprintf("%0.0fnA Galvanic", stim_amp*1e9)];
-    end
-    load(strcat(datapath, "/decisions.mat"), "avg_dts", "std_dts");
-    errorbar(coherences, avg_dts, std_dts)
-end
-hold off
-xlabel("Coherence")
-ylabel("Decision Time (s)")
-legend(fig_leg)
+top_N = num_group*0.1;
+ex_neurons = [5, 6];
+plot_name = "grouped_stim"; % or 'single_stim' or 'grouped_stim'
+plot_rasters(sim_name, pulse_amps, stim_amps, ex_neurons, t, t_task, t_taskoff, stim_freq, default_colors, top_N, ex_stim_j, ex_brain, ex_c, ex_trial, plot_name)
 %}
 
 %{
-%Accuracies
-c = 0:0.01:1;
-figure;
-hAx = axes;
-%hAx.XScale = 'log';
-hold on
-idx = 1;
-fig_leg = [];
-for j = 1:length(stim_amps)
-    stim_amp = stim_amps(j);
-    pulse = j <= length(pulse_amps);
-    if pulse
-        datapath = sprintf("Simulation %0.0f/data/%0.0fnA_pulse", ...
-            [sim_num, stim_amp*1e9]);
-        fig_leg = [fig_leg, sprintf("%0.0fnA Pulse", stim_amp*1e9)];
-    else
-        datapath = sprintf("Simulation %0.0f/data/%0.0fnA_galvanic", ...
-            [sim_num, stim_amp*1e9]);
-        fig_leg = [fig_leg, sprintf("%0.0fnA Galvanic", stim_amp*1e9)];
-    end
-    load(strcat(datapath, "/decisions.mat"), "avg_acc", "decisions");
-    %coeffs
-    %scatter(coherences, avg_acc, dc_colors(idx))
-    %plot(c, weibull(coeffs, c), dc_colors(idx))
-    plot(coherences, avg_acc, 'o-')
-end
-hold off
-xlabel("Coherence")
-ylabel("Accuracy")
-legend(fig_leg)
-%f = flipud(get(gca, 'Children'));
-%legend([f(2), f(4), f(6)], "I-dc=-4pA", "I-dc=0pA", "I-dc=4pA")
-%legend(compose("I-dc=%0.0fpA", I_dcs(1, :)*1e12))
+win_size = floor(0.250 / dt); %250ms moving window
+%cv_window = t >= 2.5 & t<3; %Plotting window
+cv_window = t >= t_task & t<t_taskoff; %Plotting window
+ex_neuron = 7;
+top_N = floor(num_group);
+plot_name = "p1_wins"; % or 'ex_trial' or 'p1_wins'
+plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
+                 win_size, cv_window, default_colors, ex_brain, ex_c, ex_trial, ...
+                 ex_neuron, brains, num_brains, pulse_coherences, galvanic_coherences, control_coherences, ...
+                 start_trial, end_trial, num_trials, plot_name)
 %}
 
-function [time_idx, neuron_idx] = get_spike_idx(g_spikes)
-    [~, g_idx] = sort(sum(g_spikes, 1));
-    g_spikes = g_spikes(:, g_idx);
-    [time_idx, neuron_idx] = find(g_spikes);
-end
+%{
+idx_diff = stim_ind+1;% how far off timing is from pulse timing + 1 to account for t(1) = 0
+plot_phaselock(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, num_group, ...
+                        idx_diff, default_colors, brains, num_brains, ...
+                        pulse_coherences, galvanic_coherences, control_coherences, ...
+                        start_trial, end_trial, num_trials)
+%}
 
-function [frs, fr_var] = spikes2popfrs(spikes, dt, p, f, N_E)
-    win_size = 5e-3;
-    avg_win_size = 50e-3;
-    num_group = floor(f*N_E);
-    w = ones(floor(win_size/dt), 1);
-    w = w ./ length(w);
-    neuron_frs = filter(w, 1, spikes) ./ dt;
-    w = ones(floor(avg_win_size/dt), 1);
-    w = w ./ length(w);
-    neuron_frs = filter(w, 1, neuron_frs);
-    frs = zeros(size(spikes, 1), p+2);
-    fr_var = zeros(size(spikes, 1), p+2);
-    for i = 1:p
-        group_idx = ((i-1)*num_group+1):i*num_group;
-        frs(:, i) = mean(neuron_frs(:, group_idx), 2);
-        fr_var(:, i) = std(neuron_frs(:, group_idx), [], 2);
-    end
-    frs(:, end-1) = mean(neuron_frs(:, f*p*N_E+1:N_E), 2);
-    fr_var(:, end-1) = std(neuron_frs(:, f*p*N_E+1:N_E), [], 2);
-    frs(:, end) = mean(neuron_frs(:, N_E+1:end), 2);
-    fr_var(:, end) = std(neuron_frs(:, N_E+1:end), [], 2);
-end
+%{
+N_start = 1;
+N_end = floor(num_group);
+win_start = 2.5;
+win_stop = 3;
+c_win = 300*1e-6;
+c = 0;
+brains = [1];
+num_brains = 1;
+plot_sync(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, num_group, ...
+          default_colors, brains, num_brains, N_start, N_end, ...
+          win_start, win_stop, c_win, c, ...
+          pulse_coherences, galvanic_coherences, control_coherences, ...
+          start_trial, end_trial, num_trials)
+%}
+
+%{
+win_start = t_task;
+win_stop = t_task + 0.1;
+ex_c = 0;
+sim_name = "EMBC Disconnected";
+%  plot_name = 'ex_c' or 'p1_wins' or 'p1_loses'
+plot_name = "ex_c";
+plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_start, ...
+                     win_stop, default_colors, brains, num_brains, ...
+                     pulse_coherences, galvanic_coherences, control_coherences, ...
+                     start_trial, end_trial, num_trials, plot_name);
+%}
+
+plot_decisions(sim_name, pulse_amps, stim_amps, default_colors, brains, ...
+               num_brains, num_batch, ...
+               pulse_coherences, galvanic_coherences, control_coherences)

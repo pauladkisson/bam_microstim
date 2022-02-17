@@ -7,29 +7,35 @@ clear;
 tic;
 
 %% Simulation Parameters
-sim_name = "Test";
+sim_name = "EMBC Disconnected";
 sim_path = sprintf("Simulation %s", sim_name);
 mkdir(sim_path)
 dt = 0.05e-3; %ms
 t_span = 4;
 t = 0:dt:t_span;
 start_trial = 1;
-end_trial = 4;
+end_trial = 36;
 
 %% Network Parameters
-percent_size = 0.01;
+%percent_size = 0.5;
+percent_size = 0.15;
 N_E = floor(1600 * percent_size);
-N_I = floor(400 * percent_size);
+%N_I = floor(400 * percent_size);
+N_I = 0;
 N = N_E + N_I;
-f = 0.15; % Fraction of cortical neurons asctivated by one type of stimulus
+%f = 0.15; % Fraction of cortical neurons asctivated by one type of stimulus
+f = 0.5;
 p = 2; % Number of different types of stimuli
 num_selective = floor(p*f*N_E);
 num_group = floor(f*N_E);
-w_plus = 1.7; % Strength of "strong" synapses in the BAM network
-w_minus = 1 - f*(w_plus - 1)/(1-f); %Strength of "weak" synapses in BAM
-w = 1; %Strength of normal synapses in BAM
+%w_plus = 1.7; % Strength of "strong" synapses in the BAM network
+%w_minus = 1 - f*(w_plus - 1)/(1-f); %Strength of "weak" synapses in BAM
+%w = 1; %Strength of normal synapses in BAM
+w_plus = 0;
+w_minus = 0;
+w = 0;
 start_brain = 1;
-end_brain = 1;
+end_brain = 10;
 brains = start_brain:end_brain;
 GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path);
 GenerateConductances(N_E, N_I, sim_path)
@@ -40,9 +46,12 @@ pop_type(N_E+1:end) = 2; % population_type = 1 for pyr, 2 for int
 fr_bg = 2400;
 % Synaptic Conductance = [pyramidal, interneuron]
 G_ampa_ext = [2.1, 1.62]*1e-9; %nS
-pulse_coherences = [-100, -72.4, -51.2, -25.6, 0, 25.6] / 100;
-galvanic_coherences = [-100, -51.2, -36.2, -25.6, 0, 25.6] / 100;
-control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
+%pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
+%control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
+%galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+pulse_coherences = [0] / 100;
+control_coherences = [0] / 100;
+galvanic_coherences = [0] / 100;
 coherences = union(union(pulse_coherences, galvanic_coherences), control_coherences, 'sorted');
 max_fr_task = 80;
 t_task = 1;
@@ -70,9 +79,11 @@ alpha = 500; %Hz
 %% Microstimulation Parameters
 stim_duration = 300e-6; %us / phase
 stim_ind = floor(stim_duration*2 / dt);
-pulse_amps = [-10*1e-6];
+%pulse_amps = [-10*1e-6];
+pulse_amps = [];
 stim_freq = 200; %Hz
-dc_amps = [-28, 0]*1e-9;
+%dc_amps = [-28, 0]*1e-9;
+dc_amps  = [-28]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, pulse_amps, dc_amps, ...
                   N, num_group, brains, sim_path);
@@ -180,7 +191,7 @@ t_ps = best_tref_per_c(:, 2)*1e-3;
 [min_ps, min_ps_idx] = min(t_ps(2:end));
 t_ps(1:min_ps_idx) = 0; %LIF model already accounts for low-amplitude insufficiency
 t_sp = best_tref_per_c(:, 3)*1e-3;
-I_b = t_b(:, 1)*200*1e-9/360;
+I_b = t_b(:, 1)*100*1e-9/360;
  
 %% Save
 save_path = strcat(sim_path, "/bam_constants.mat");

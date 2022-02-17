@@ -1,4 +1,4 @@
-function GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
+function GenerateBAM_NoRecX(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
     N = N_E + N_I;
     adja = w*ones(N, N);
     num_group = floor(f*N_E);
@@ -10,6 +10,7 @@ function GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
     end
     diag_idx = logical(eye(size(adja)));
     adja(diag_idx) = 0; %Disallow self-connections
+    adja(1:N_E, 1:N_E) = 0; %No Recurrent Excitations
     savepath = strcat(sim_path, "/adja.mat");
     save(savepath, "adja")
     
@@ -31,7 +32,7 @@ function GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
         mkdir(brainpath)
         save(strcat(brainpath, "/r.mat"), "ball_r", "electric_r")
         
-        
+        %{
         %figure;
         %imagesc(adja)
         %colorbar;
@@ -47,7 +48,7 @@ function GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
         xlabel("Stimulation Current (nA)")
         ylabel("Number of Neurons")
 
-        galvanic_test_stim = -28*1e-9;
+        galvanic_test_stim = -100*1e-9;
         figure;
         subplot(2, 1, 1)
         scatter(ball_r*1e6, electric_r*galvanic_test_stim*1e12)

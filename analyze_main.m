@@ -2,18 +2,26 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "EMBC";
+sim_name = "EMBC Disconnected";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
+
 start_trial = 1;
 end_trial = 36;
 trials = start_trial:end_trial;
 num_trials = length(trials);
 brains = 1:10;
 reconstruct = false;
-pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
-control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
-galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+num_batch = 3;
+batch_size = floor(length(trials) / num_batch);
+logistic_regression = false;
+
+%pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
+%control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
+%galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+pulse_coherences = [0];
+control_coherences = [0];
+galvanic_coherences = [0];
 pulse_amps = [-10*1e-6];
 dc_amps = [-28, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
@@ -54,6 +62,7 @@ for brain = brains
         std_incorrect_dts = zeros(length(coherences), 1);
         avg_acc = zeros(length(coherences), 1);
         avg_final_acc = zeros(length(coherences), 1);
+        batch_final_acc = zeros(length(coherences), num_batch);
         percent_nodec = zeros(length(coherences), 1);
         percent_earlydec = zeros(length(coherences), 1);
         tot_frs = zeros(length(coherences), num_trials, length(t), 4);
@@ -133,6 +142,12 @@ for brain = brains
             percent_earlydec(i) = sum(decision_times(:, i)<=0, 'all') / end_trial;
             coherent_fin_decs = final_decisions(final_decisions(:, i)~=0, i);
             avg_final_acc(i) = sum(coherent_fin_decs == 1) / length(coherent_fin_decs);
+            if stim_amp == 0 %batch for control
+                for batch = 1:num_batch
+                    batch_idx = 1+(batch-1)*batch_size:batch*batch_size;
+                    batch_final_acc(i, batch) = sum(coherent_fin_decs(batch_idx)==1) / batch_size;
+                end
+            end
 
             %Breakdown DTs by outcome
             avg_correct_dts(i) = mean(coherent_times(coherent_decisions==1));
@@ -195,14 +210,24 @@ for brain = brains
         [c_idx, trial_idx] = ind2sub(size(dec_thresholds_ub), idx);
         dec_thresh_idx(2, :) = [c_idx, trial_idx];
 
-        %Fit to weibull FN
-        %coeffs = lsqcurvefit(@weibull, [1, 1, 1], coherences, avg_acc');
-        coeffs = [1e-9, 0];
+        if logistic_regression
+            %Fit to logistic FN as in Hanks et al. 2006
+            coeffs = lsqcurvefit(@logistic_acc, [1, 1], coherences, avg_final_acc');
+            batch_coeffs = zeros(num_batch, 2);
+            if stim_amp == 0 %batch controls for stats
+                for batch = 1:num_batch
+                    batch_coeffs(batch, :) = lsqcurvefit(@logistic_acc, [1, 1], coherences, batch_final_acc(:, batch)');
+                end
+            end
+        else
+            coeffs = [];
+            batch_coeffs = [];
+        end
         avg_frs = mean(tot_frs, 2);
         std_frs = std(tot_frs, 0, 2);
         decisionpath = strcat(output_stimpath, "/decisions.mat");
         save(decisionpath, "decisions", "final_decisions", "decision_times", "final_decision_times", ...
-            "avg_dts", "std_dts", "avg_acc", "avg_final_acc", "percent_nodec", "coeffs", ...
+            "avg_dts", "std_dts", "avg_acc", "avg_final_acc", "percent_nodec", "coeffs", "batch_coeffs", ...
             "avg_frs", "std_frs", "avg_correct_frs", "std_correct_frs", ...
             "avg_incorrect_frs", "std_incorrect_frs", ...
             "avg_nodec_frs", "std_nodec_frs", ...

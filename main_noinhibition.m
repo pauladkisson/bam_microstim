@@ -4,7 +4,7 @@
 %%% Adds Pulse-refractory period
 
 clear;
-sim_name = "EMBC Disconnected";
+sim_name = "NoInhibitionNoTaskTrials";
 sim_path = sprintf("Simulation %s", sim_name);
 tic;
 load(strcat(sim_path, "/bam_constants.mat"))
@@ -39,8 +39,8 @@ for brain = brains
             input_coherentpath = sprintf("Simulation %s/spikes/c=%0.3f", sim_name, c);
             output_coherentpath = strcat(output_stimpath, sprintf("/c=%0.3f", c));
             mkdir(output_coherentpath)
-            parfor trial = start_trial:end_trial
-            %for trial = start_trial:end_trial
+            %parfor trial = start_trial:end_trial
+            for trial = start_trial:end_trial
                 fprintf("trial: %0.0f \n", trial)
                 input_trialpath = strcat(input_coherentpath, sprintf("/trial%0.0f/input.mat", trial));
                 output_trialpath = strcat(output_coherentpath, sprintf("/trial%0.0f.mat", trial));
@@ -76,8 +76,16 @@ for brain = brains
                         g_ampa_ext = s_ampa_ext_ch.*G_ampa_ext(pop_type);
                         s_nmda_ch = s_nmda(i-delay_ind, :);
                         s_gaba_ch = s_gaba(i-delay_ind, :);
-                        I_temp = synapse_current(V_ch, s_ampa_ch, g_ampa_ext, s_nmda_ch, s_gaba_ch, ...
+                        if t(i) < t_task || t(i) > t_taskoff
+                            I_temp = synapse_current(V_ch, s_ampa_ch, g_ampa_ext, s_nmda_ch, s_gaba_ch, ...
                             adja, AMPA, NMDA, GABA);
+                        else
+                            no_inhibition_adja = adja;
+                            topN = 9;
+                            no_inhibition_adja(N_E+1:end, 1:topN) = 0;
+                            I_temp = synapse_current(V_ch, s_ampa_ch, g_ampa_ext, s_nmda_ch, s_gaba_ch, ...
+                            no_inhibition_adja, AMPA, NMDA, GABA);
+                        end
                         I_ch = sum(I_temp, 1);
                     end
 
