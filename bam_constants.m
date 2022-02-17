@@ -7,14 +7,14 @@ clear;
 tic;
 
 %% Simulation Parameters
-sim_name = "EMBC Disconnected";
+sim_name = "DepolBlockDiscon";
 sim_path = sprintf("Simulation %s", sim_name);
 mkdir(sim_path)
 dt = 0.05e-3; %ms
 t_span = 4;
 t = 0:dt:t_span;
 start_trial = 1;
-end_trial = 36;
+end_trial = 1;
 
 %% Network Parameters
 %percent_size = 0.5;
@@ -35,7 +35,7 @@ w_plus = 0;
 w_minus = 0;
 w = 0;
 start_brain = 1;
-end_brain = 10;
+end_brain = 1;
 brains = start_brain:end_brain;
 GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path);
 GenerateConductances(N_E, N_I, sim_path)
@@ -79,14 +79,15 @@ alpha = 500; %Hz
 %% Microstimulation Parameters
 stim_duration = 300e-6; %us / phase
 stim_ind = floor(stim_duration*2 / dt);
-%pulse_amps = [-10*1e-6];
-pulse_amps = [];
 stim_freq = 200; %Hz
-%dc_amps = [-28, 0]*1e-9;
-dc_amps  = [-28]*1e-9;
+depol_block_thresh = 800*1e-12;
+depol_block_factor = 3;
+pulse_amps = [-10*1e-6];
+dc_amps = [-28, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
-GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, pulse_amps, dc_amps, ...
-                  N, num_group, brains, sim_path);
+GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
+                  depol_block_thresh, depol_block_factor, pulse_amps, ...
+                  dc_amps, N, num_group, brains, sim_path);
 
 %% Firing Rate Parameters
 win_size = 5e-3;
