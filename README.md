@@ -25,22 +25,30 @@ The data is stored in a different folder for each simulation ("Simulation X"), w
 
 ## Data Storage
 Data is stored in an organized nested folder structure with the following levels
-I) Simulation name ("Simulation Test"), which contains \n
-    A) conductances.mat, which stores matrices with connection conductances for ampa (``AMPA``), gaba (``GABA``), nmda (``NMDA``) synapses
-    B) bam_constants.mat, which stores a variety of useful constants
-    C) adja.mat, which stores connection adjacency matrix ``adja``
-    D) spikes, which contains the task-related and background input spikes for each trial/coherence under
-      1) c=*coherence* (ex. "c=-1.000")
-        a) trialX.mat (ex. "trial1.mat")
-          i) input.mat, which contains a variable with all the input spikes called ``spikes``
-    E) brainX (ex "brain1"), which contains all the nested data/constants for a given brain
-      1) r.mat, which stores the locations of each P1 neuron (``ball_r``), and their effective electrical distance (``electric_r``)
-      2) ustim, which contains the stimulation currents for each of the stimulation condition
-        a) ``stim_amp``nA*stim_cond*.mat (ex. "-28.0nA_galvanic.mat"), which stores the instantaneous microstimulation current for each neuron (``I_ustim``)
-      3) data, which contains the data for each trial in a nested structure
-        a) ``stim_amp``nA_*stim_cond* (ex. "-28.0nA_galvanic") for each stimulation condition
-          i) c=*coherence* ex. ("c=-1.000") for each coherence
-            I) trialX.mat (ex. "trial1.mat"), which stores the spike times for each neuron in a containers.map variable (``recspikes``),
+- Simulation name ("Simulation Test"), which contains
+    - conductances.mat, which stores matrices with connection conductances for ampa (``AMPA``), gaba (``GABA``), nmda (``NMDA``) synapses
+    - bam_constants.mat, which stores a variety of useful constants
+    - adja.mat, which stores connection adjacency matrix ``adja``
+    - spikes, which contains the task-related and background input spikes for each trial/coherence under
+      - c=*coherence* (ex. "c=-1.000")
+        - trialX.mat (ex. "trial1.mat")
+          - input.mat, which contains a variable with all the input spikes called ``spikes``
+    - brainX (ex "brain1"), which contains all the nested data/constants for a given brain
+      - r.mat, which stores the locations of each P1 neuron (``ball_r``), and their effective electrical distance (``electric_r``)
+      - ustim, which contains the stimulation currents for each of the stimulation condition
+        - ``stim_amp``nA*stim_cond*.mat (ex. "-28.0nA_galvanic.mat"), which stores the instantaneous microstimulation current for each neuron (``I_ustim``)
+      - data, which contains the data for each trial in a nested structure
+        - ``stim_amp``nA_*stim_cond* (ex. "-28.0nA_galvanic") for each stimulation condition
+          - decisions.mat, which stores all of the analyzed variables from analyze_main.m
+          - c=*coherence* ex. ("c=-1.000") for each coherence
+            - trialX.mat (ex. "trial1.mat"), which stores the spike times for each neuron in a containers.map variable (``recspikes``),
                   in which the keys are the neuron number as a string (ex. ``'1'``) and the values are a vector containing the time indices
-                  when the neuron fired an action potential (ex. t(recspikes('1')) = [0.521, 1.001, 2.325, 2.9, 2.997, 3.053])
+                  when the neuron fired an action potential (ex. ``t(recspikes('1')) = [0.521, 1.001, 2.325, 2.9, 2.997, 3.053]``).  It also stores the
+                  instaneous population firing rates for each neuron (``pop_frs``) after analyze_main.m has been run with ``reconstruct = true``.
+                  
+
+## Detailed Description of 4 main scripts and subsidiary functions
+### bam_constants.m
+
+
         
