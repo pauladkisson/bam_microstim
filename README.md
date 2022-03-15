@@ -25,7 +25,7 @@ The data is stored in a different folder for each simulation ("Simulation X"), w
 
 ## Data Storage
 Data is stored in an organized nested folder structure with the following levels
-I) Simulation name ("Simulation Test"), which contains
+I) Simulation name ("Simulation Test"), which contains \n
     A) conductances.mat, which stores matrices with connection conductances for ampa (``AMPA``), gaba (``GABA``), nmda (``NMDA``) synapses
     B) bam_constants.mat, which stores a variety of useful constants
     C) adja.mat, which stores connection adjacency matrix ``adja``
