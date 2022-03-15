@@ -11,4 +11,14 @@ The project is generally run by 4 code scripts:
 The data is stored in a different folder for each simulation ("Simulation X"), which is determined by the ``sim_name`` variable defined in bam_constants.m.    
 
 ## How to use
-- 
+- Define name of simulation with ``sim_name`` variable in bam_constants.m (ex. "X")
+- Adjust parameters as necessary
+- Call bam_constants --> saves necessary constants
+- Update ``sim_name`` in main.m
+- Call main.m --> for each brain/stimulation condition/coherence/trial, saves data in "Simulation X/brainY/data/``stim_amp``nA_*stim_cond*/c=*coherence*/trialZ.mat"
+- Update ``sim_name`` in analyze_main.m
+- Set ``reconstruct = true`` to reconstruct instaneous population firing rates (``pop_frs``) from spike times (``recspikes``)
+- Call analyze_main --> saves analyzed variables in "Simulation X/brainY/data/``stim_amp``nA*stim_cond*/decisions.mat"
+- Update ``sim_name`` in plot_results.m
+- Uncomment whichever plotting section you want to visualize
+- Call plot_results --> visualizes data
