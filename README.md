@@ -50,10 +50,29 @@ Data is stored in an organized nested folder structure with the following levels
 ## Detailed Description of 4 main scripts and subsidiary functions
 ### bam_constants.m
   Define constants, input currents, brain architecture, etc.
-  #### Simulation Parameters
-    Define simulation-wide parameters
-    - ``sim_name`` : name of simulation to show up on folder
-    - ``sim_path`` : 
-    
+#### Simulation Parameters
+  - ``sim_name`` : name of simulation
+  - ``sim_path`` : folder name for simulation
+  - ``dt`` : time step for euler's integration
+  - ``t_span`` : duration of simulation (s)
+  - ``start_trial`` : first trial to run
+  - ``end_trial`` : last trial to run
 
-        
+#### Network Parameters
+  - Total number of neurons in the network ``N = 2000 * percent_size = N_E + N_I``; where ``N_E`` is the number of excitatory neurons and ``N_I`` is the number of inhibitory neurons
+  - ``f`` : fraction of cortical neurons affected by one type of stimulus (``(1-f)*N_E`` is the number of non-selective excitatory neurons)
+  - ``p`` : Number of different types of stimuli i.e. number of selective neuron groups
+  - ``num_selective`` : Number of selective neurons (P1 and P2)
+  - ``num_group`` : Number of neurons in one group (ex. P1)
+  - ``w_plus, w_minus, w`` : Strength of 'strong', 'weak', and normal synapses in the BAM
+  - ``start_brain, end_brain`` : first and last brain to run in a simulation
+  - ``pop_type`` : vector recording type of each neuron (1 for excitatory, 2 for inhibitory)
+  - GenerateBAM
+    - Creates adjacency matrix ``adja`` and saves to "Simulation X/adja.mat"
+    - Positions neurons at regularly spaced intervals (+ random jitter) and saves positions as ``ball_r`` in "Simulation X/brainY/r.mat"
+    - Tests results by plotting microstimulation currents for each neuron for an extracellular test current (``pulse_test_stim, galvanic_test_stim``)
+  - GenerateBAM_NoRecX : The same as GenerateBAM except without recurrent excitation connections
+  - GenerateConductances
+    - Creates conductance matrices ``AMPA, NMDA, GABA`` and saves to "Simulation X/conductances.mat"
+#### Input Parameters
+  - 
