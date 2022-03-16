@@ -49,6 +49,11 @@ Data is stored in an organized nested folder structure with the following levels
 
 ## Detailed Description of 4 main scripts and subsidiary functions
 ### bam_constants.m
-
+  Define constants, input currents, brain architecture, etc.
+  #### Simulation Parameters
+    Define simulation-wide parameters
+    - ``sim_name`` : name of simulation to show up on folder
+    - ``sim_path`` : 
+    
 
         
