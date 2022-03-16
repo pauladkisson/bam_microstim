@@ -142,4 +142,24 @@ Data is stored in an organized nested folder structure with the following levels
 #### Pulse Blocking Effects
   - if the stimulation condition is pulse,
     - For the neurons in pulse-pulse block, set the microstimulaiton current ``I_ustim`` to 0 
-    - For the neurons in pulse-spontaneous block, set the synaptic/
+    - For the neurons in pulse-spontaneous block, set the synaptic/external current ``I_ch`` to 0
+#### Voltage update
+  - Update membrane potential according to euler's method
+#### pulse refractory
+  - At the end of each pulse, determine which neurons are blocked
+  - If not blocked, the pulse-pulse refractory period and pulse-spontaneous refractory periods are determined by simply interpolating with ``t_ps, t_pp`` and ``I_b``
+  - If already blocked, the additional pulse-pulse and pulse-spontaneous refractory periods are determined by the same interpolation as above times a correction factor
+  - At the end, decrement both blocking periods
+#### fast_parsave
+  - saves the spiking data into a containers.Map object called ``recspikes`` where the keys are the neuorn numbers (ex. ``'1'``) and the values are the time indices when that neuron spikes.
+  - The data is saved in the appropriate filepath: "Simulation X/brainY/data/``stim_amp``nA*stim_condition*/c=*coherence*/trialZ.mat"
+
+### analyze_main.m
+- Specify which simulation, stimulation conditions/amplitudes, start and end trials, start and end brains, and coherences  to analyze
+- ``reconstruct`` : boolean, whether or not to reconstruct population firing rates ``pop_frs`` from recspikes.  Note: this is a 
+      time-intesive process.
+- ``logistic_regression``: boolean, whether or not to perform logistic regression on the accuracy data to obtain parameter values
+- Iterate through each brain, stimulation condition, coherence, and trial
+- ``decisions`` : outcome of each trial (0 for no decision, 1 for P1 wins, 2 for P2 wins) using first-to-threshold method
+- ``final_decisions`` : outcome of each trial using winner-at-the-end method
+- ``
