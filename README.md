@@ -75,4 +75,41 @@ Data is stored in an organized nested folder structure with the following levels
   - GenerateConductances
     - Creates conductance matrices ``AMPA, NMDA, GABA`` and saves to "Simulation X/conductances.mat"
 #### Input Parameters
-  - 
+  - ``fr_bg`` : background input firing rate
+  - ``G_ampa_ext`` : maximum external ampa conductance (siemens)
+  - ``pulse_coherences, control_coherences, galvanic_coherences`` : coherence values for pulse, control, and galvanic stimulation conditions
+  - ``max_fr_task`` : maximum task-related input firing rate
+  - ``t_task`` : time that the task (and microstimulation) begin (s)
+  - ``t_taskoff`` : time that task (and microstimulation) end (s)
+  - GenerateSpikes
+    - Creates matrix recording background and task-related input spikes for each neuron (size = length(t) x N) : ``spikes``
+    - Saves ``spikes`` in appropriate location for each coherence/trial : "Simulation X/spikes/c=*coherence*/trialY/input.mat"
+#### Microstimulation Parameters
+  - ``stim_duration`` : duration of pulse (s/phase)
+  - ``stim_ind`` : time of full pulse presentation (two phases) in terms of time index
+  - ``pulse_amps`` : amplitude(s) of pulse stimulation
+  - ``stim_freq`` : pulse stimulation frequency (Hz)
+  - ``dc_amps`` : galvanic stimulation amplitude(s)
+  - ``stim_amps`` : ``[pulse_amps, dc_amps]``
+  - GenerateMicrostim
+    - Creates microstimulation current ``I_ustim`` (size = length(t) x N) for each neuron and timepoint
+    - Saves ``I_ustim`` in appropriate location for each brain : "SimulationX/brainY/ustim/``stim_amp``nA_*stim_cond*.mat"
+#### Firing Rate Parameters
+  - ``win_size`` : window size for calculating instaneous firing rate
+  - ``win_index`` : discretized ``win_size``
+  - ``avg_win_size`` : window size for moving average of instaneous firing rate
+  - ``avg_win_index`` : discretized ``avg_win_size``
+#### t_b
+  - ``t_b`` : general blocking times and current amplitudes from vestibular axon model
+  - ``best_tref_per_c`` : vector containing pulse-pulse, pulse-spontaneous, and spontaneous-pulse blocking times from vestibular axon model
+  - ``t_pp`` : pulse-pulse blocking times
+  - ``t_ps`` : pulse-spontaneous blocking times
+  - ``I_b`` : blocking pulse amplitudes fitted to the LIF model
+#### Save
+  - saves all constants in "Simulation X/bam_constants.mat"
+
+
+## Main
+
+
+#### Microstimulation Parameters
