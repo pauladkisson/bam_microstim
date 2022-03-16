@@ -109,7 +109,4 @@ Data is stored in an organized nested folder structure with the following levels
   - saves all constants in "Simulation X/bam_constants.mat"
 
 
-## Main
-
-
-#### Microstimulation Parameters
+### Main
