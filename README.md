@@ -109,4 +109,37 @@ Data is stored in an organized nested folder structure with the following levels
   - saves all constants in "Simulation X/bam_constants.mat"
 
 
-### Main
+### main.m
+  - Loads various constants from bam_constants.mat, as well as adjacency matrices and conductance matrices
+  - Iterate through each brain, stimulation condition, coherence, and trial
+  - Load input spikes ``spikes`` and microstimulation current ``I_ustim``
+#### LIF variables
+  - ``RP_ind`` : remaining refractory indices for each neuron (decrements every time step)
+  - ``RP_pp_ind`` : remianing pulse-pulse blocking refractory indices for each neuron
+  - ``RP_ps_ind`` : remaining pulse-spontaneous blocking refractory indicies for each neuron
+  - ``Vm`` : membrane potential for each neuron (volts)
+  - ``s_ampa`` : dynamical ampa synapse variable
+  - ``s_ampa_ext`` : dynamical external ampa synapse variable
+  - ``s_nmda`` : dynamical nmda synapse variable
+  -  ``x_nmda`` : 2nd dynamical nmda synapse variable
+  - ``s_gaba`` : dynamical gaba synapse variable
+#### Synpatic Current
+  - ``I_ch`` : 'channel' current for the current time step
+  - ``V_ch`` : 'channel' voltage for the current time step
+  - ``*_ch`` : the 'channel' version of any variable indexed for the current (or delayed) time step only
+  - synapse_current
+    - Calculates AMPA, NMDA, and GABA synaptic currents for each neuron : returns ``I``
+#### External input
+  - If there is an external spike in ``spikes`` increment external dynamical ampa synapse variable ``s_ampa_ext``
+#### Spiking behavior
+  - if any neurons have membrane potential > ``Vs``,
+    - draw the spike
+    - reset membrane potential to ``Vr``
+    - reset refractory index ``RP_ind``
+    - increment dynamical synapse variables ``s_ampa, x_nmda, s_gaba``
+#### Synapse Update
+  - Update synapse variables according to euler's method
+#### Pulse Blocking Effects
+  - if the stimulation condition is pulse,
+    - For the neurons in pulse-pulse block, set the microstimulaiton current ``I_ustim`` to 0 
+    - For the neurons in pulse-spontaneous block, set the synaptic/
