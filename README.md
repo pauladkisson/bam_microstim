@@ -186,4 +186,17 @@ Data is stored in an organized nested folder structure with the following levels
   - whichever subpopulation has the higher average firing rate at the end the of the trial (``t = t_span``) is deemed the winner (as long as it is also above 15Hz). Then, the time when that subpopulation cleared 15Hz is deemed the decision time.
 
 ### plot_results.m
-- 
+- define simulation name, trials/coherences/brains/etc. to plot
+- plot_frs : visualizes example trial of population-averaged firing rates
+- plot_rasters : visualizes example trial of individual neuron raster plots for specified neurons (``ex_neurons``)
+- plot_cv : visualizes coefficient of variation for example trials (if ``plot_name = 'ex_trials'``) or averaged across trials for a given outcome specification (if ``plot_name = 'p1_wins' or 'p1_loses'``)
+  - also displays statistics from 2-way t-test
+- plot_phaselock : visualizes phase locking of P1 to pulse stimulation input averaged across trials, and compares connected and disconnected cases
+  - also shows results of 2-way t-test
+- plot_sync : visualizes synchrony of P1 in different stimulation conditions
+  - also shows results of 2-way t-test
+- plot_frdist : visualizes distribution of total average firing rates of P1 as it varies with distance from the electrode for different stimulation conditions
+  - also shows results of 2-way t-test
+- plot_decisions : visualizes accuracy and decision time vs coherence for different stimulation conditions
+  - also shows the resulting curve from fitting the data to logistic regression function
+  - also shows results of 2-way t-test
