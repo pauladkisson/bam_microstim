@@ -162,4 +162,28 @@ Data is stored in an organized nested folder structure with the following levels
 - Iterate through each brain, stimulation condition, coherence, and trial
 - ``decisions`` : outcome of each trial (0 for no decision, 1 for P1 wins, 2 for P2 wins) using first-to-threshold method
 - ``final_decisions`` : outcome of each trial using winner-at-the-end method
-- ``
+- ``decision_times`` : time when first population exceeds 15Hz for each trial
+- ``final_decision_times`` : time when winning population clears 15Hz for each trial using winner-at-the-end method
+- ``avg_dts`` : average decision time over all trials at each coherence
+- ``std_dts`` : standard deviation of decision times over trials for each coherence
+- ``avg_correct_dts, avg_incorrect_dts`` : average decision time over trials for each coherence partitioned by outcome (P1 wins = correct, P1 loses = incorrect)
+- ``std_correct_dts, std_incorrect_dts`` : same as above except for standard deviations
+- ``avg_acc`` : fraction of trials in which P1 won (first-to-thresh method) for each coherence
+- ``avg_final_acc`` : fraction of trials in which P1 won (winner-at-the-end method)
+- ``batch_final_acc`` :  final accuracy split into batches of ``batch_size`` trials for variability comparisons
+- ``percent_nodec`` : fraction of trials in which no decision was reached (no population firing rates exceeded 15Hz)
+- ``percent_earlydec`` : fraction of trials in which a decision was reached before the task related stimulation started (``t=t_task``)
+- ``tot_frs`` : a convenience variable that has all population firing rates across all coherences and trials
+- ``avg_correct_frs, std_correct_frs, avg_nodec_frs, avg_earlydec_frs, avg_incorrect_frs, etc.`` : instaneous population firing rates and standard deviations partitioned by outcome (correct, incorrect, no decision, early decision)
+- ``avg_correct_peaks, std_incorrect_peaks, etc.`` : average and standard deviation of the maximum population firing rate of each trial partitioned by outcome
+- ``dec_thresholds_lb, dec_thresholds_ub`` : true decision threshold determined by the maximum firing rate achieved by losing populations (lower bound) and the minimum firing rate achieved by winning populations (upper bound)
+- ``totspikes_g1, totspikes_g2, etc.`` : the total number of spikes fired by each neuron in each trial for a given subpopulation (g1 = P1, g2 = P2, etc.)
+- get_decision
+  - first-to-threshold method of determining the winner of a trial
+  - whichever subpopulation clears 15Hz first is deemed the winner, and that time is called the decision time
+- get_final_decision
+  - winner-at-the-end method of determining the winner of a trial
+  - whichever subpopulation has the higher average firing rate at the end the of the trial (``t = t_span``) is deemed the winner (as long as it is also above 15Hz). Then, the time when that subpopulation cleared 15Hz is deemed the decision time.
+
+### plot_results.m
+- 
