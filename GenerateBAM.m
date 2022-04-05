@@ -31,7 +31,7 @@ function GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
         mkdir(brainpath)
         save(strcat(brainpath, "/r.mat"), "ball_r", "electric_r")
         
-        
+        %{
         %figure;
         %imagesc(adja)
         %colorbar;
