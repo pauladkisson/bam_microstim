@@ -1,5 +1,5 @@
 %clear;
-sim_name = "DepolBlockDiscon";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 figure;
@@ -7,7 +7,8 @@ default_colors = get(gca, "colororder");
 start_trial = 1;
 end_trial = 1;
 num_trials = end_trial - start_trial + 1;
-brains = 1:10;
+%brains = 1:10;
+brains = 1:3;
 num_brains = length(brains);
 num_batch = 3;
 %{
@@ -21,7 +22,7 @@ control_coherences = [0];
 galvanic_coherences = [0];
 %}
 pulse_amps = [-10*1e-6];
-dc_amps = [-28, 0]*1e-9;
+dc_amps = [-110, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 
 %{

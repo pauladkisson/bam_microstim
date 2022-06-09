@@ -4,7 +4,7 @@
 %%% Adds Pulse-refractory period
 
 clear;
-sim_name = "DepolBlockDiscon";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 tic;
 load(strcat(sim_path, "/bam_constants.mat"))

@@ -2,7 +2,7 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "DepolBlockDiscon";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 
@@ -25,7 +25,7 @@ pulse_coherences = [0];
 control_coherences = [0];
 galvanic_coherences = [0];
 pulse_amps = [-10*1e-6];
-dc_amps = [-28, 0]*1e-9;
+dc_amps = [-110]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 %}
 
