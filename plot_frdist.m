@@ -44,8 +44,13 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
             end
             for trial = start_trial:end_trial
                 relative_trial = trial - start_trial + 1;
+<<<<<<< HEAD
                 if (plot_name == "p1_wins" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 1) || ...
                         (plot_name == "p1_loses" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 2)
+=======
+                if (final_decisions(relative_trial, stim_coherences==ex_c) ~= 1 && plot_name == "p1_wins") || ...
+                        (final_decisions(relative_trial, stim_coherences==ex_c) ~= 2 && plot_name == "p1_loses")
+>>>>>>> 50d200f4fda53668a87df9c65f3f4f6722acd698
                     continue
                 end  
                 load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [ex_c, trial])), ...
@@ -111,11 +116,13 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
         title("Connected")
     end
 
-    % %affected
+    % %affected Note: only considering increasing firing rate as affected
     pulse_brainfrs = reshape(stim_frs(1, :, :), [num_brains, num_group]);
     galvanic_brainfrs = reshape(stim_frs(2, :, :), [num_brains, num_group]);
-    pulse_affected = pulse_brainfrs > ctrl_mean + ctrl_std*3 | pulse_brainfrs < ctrl_mean - ctrl_std*3;
-    galvanic_affected = galvanic_brainfrs > ctrl_mean + ctrl_std*3 | galvanic_brainfrs < ctrl_mean - ctrl_std*3;
+    pulse_affected = pulse_brainfrs > ctrl_mean + ctrl_std*3;
+    galvanic_affected = galvanic_brainfrs > ctrl_mean + ctrl_std*3;
+    pulse_percent_affected = sum(pulse_affected, 2) / size(pulse_affected, 2)
+    galvanic_percent_affected = sum(galvanic_affected, 2) / size(galvanic_affected, 2)
 
     % %of neurons affected by pulse by also affected by galvanic
     num_affected = 0;
@@ -126,7 +133,7 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
             end
         end
     end
-    percent_pulse_affected_affected_by_galvanic = num_affected / sum(pulse_affected, 'all')
+    percent_pulse_affected_affected_by_galvanic = num_affected / sum(pulse_affected, 'all');
 
     %stats
     [~, p_ttest] = ttest2(galvanic_norm_mean, pulse_norm_mean)
