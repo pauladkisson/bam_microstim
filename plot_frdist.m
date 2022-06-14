@@ -44,10 +44,8 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
             end
             for trial = start_trial:end_trial
                 relative_trial = trial - start_trial + 1;
-                relative_trial
-                stim_coherences==ex_c
-                if (final_decisions(relative_trial, stim_coherences==ex_c) ~= 1 && plot_name == "p1_wins") || ...
-                        (final_decisions(relative_trial, stim_coherences==ex_c) ~= 2 && plot_name == "p1_loses")
+                if (plot_name == "p1_wins" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 1) || ...
+                        (plot_name == "p1_loses" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 2)
                     continue
                 end  
                 load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [ex_c, trial])), ...
@@ -63,8 +61,8 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
     end
     ctrl_mean = mean(stim_frs(3, 1, :));
     ctrl_std = std(stim_frs(3, 1, :));
-    top_N = num_group * 0.2; %show top 20% closest to the electrode
-    %top_N = num_group;
+    %top_N = num_group * 0.2; %show top 20% closest to the electrode
+    top_N = num_group;
     total_N = top_N*num_brains;
     pulse_frs = reshape(stim_frs(1, :, 1:top_N), [total_N, 1]);
     galvanic_frs = reshape(stim_frs(2, :, 1:top_N), [total_N, 1]);
@@ -82,7 +80,7 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
     hold off
     xlabel("Distance from Electrode (um)")
     ylabel("Firing Rate (spk/s)")
-    if sim_name == "EMBC Disconnected"
+    if sim_name == "EMBC Disconnected" || sim_name == "DepolBlockDiscon"
         title("Disconnected")
     else
         title("Connected")
@@ -107,7 +105,7 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
     xticks([1, 2])
     xticklabels(["Galvanic", "Pulsatile"])
     ylabel("Change in Firing Rate (spk/s)")
-    if sim_name == "EMBC Disconnected"
+    if sim_name == "EMBC Disconnected" || sim_name == "DepolBlockDiscon"
         title("Disconnected")
     else
         title("Connected")
