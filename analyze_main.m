@@ -2,30 +2,31 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "Test";
+sim_name = "%Activation Equivalence Connected";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 
-%{
+
 start_trial = 1;
 end_trial = 36;
 brains = 1:10;
 %}
 trials = start_trial:end_trial;
 num_trials = length(trials);
-reconstruct = true;
+reconstruct = false;
 num_batch = 3;
 batch_size = floor(length(trials) / num_batch);
-logistic_regression = false;
+logistic_regression = true;
 
-%pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
-%control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
+pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
+control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
 %galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
-pulse_coherences = [0];
-control_coherences = [0];
-galvanic_coherences = [0];
+galvanic_coherences = [-100, -75.6, -51.2, -25.6, 0, 25.6] / 100;
+%pulse_coherences = [0];
+%control_coherences = [0];
+%galvanic_coherences = [0];
 pulse_amps = [-10*1e-6];
-dc_amps = [-110]*1e-9;
+dc_amps = [-120, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 %}
 

@@ -1,9 +1,5 @@
 %clear;
-<<<<<<< HEAD
-sim_name = "%Activation Equivalence Disconnected";
-=======
-sim_name = "Test";
->>>>>>> 50d200f4fda53668a87df9c65f3f4f6722acd698
+sim_name = "EMBC I_b100";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 figure;
@@ -11,15 +7,14 @@ default_colors = get(gca, "colororder");
 start_trial = 1;
 end_trial = 36;
 num_trials = end_trial - start_trial + 1;
-%brains = 1:10;
-brains = 1:3;
+brains = 1:10;
 num_brains = length(brains);
 num_batch = 3;
 
 pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
 control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
-%galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
-galvanic_coherences = [-100, -75.6, -51.2, -25.6, 0, 25.6] / 100;
+galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+%galvanic_coherences = [-100, -75.6, -51.2, -25.6, 0, 25.6] / 100;
 %}
 %{
 pulse_coherences = [0];
@@ -27,11 +22,7 @@ control_coherences = [0];
 galvanic_coherences = [0];
 %}
 pulse_amps = [-10*1e-6];
-<<<<<<< HEAD
-dc_amps = [-120, 0]*1e-9;
-=======
-dc_amps = [-110, 0]*1e-9;
->>>>>>> 50d200f4fda53668a87df9c65f3f4f6722acd698
+dc_amps = [-28, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 
 %{
@@ -39,7 +30,7 @@ ex_c = 0/100;
 ex_trial = 1;
 ex_brain = 1;
 ex_stim_j = 1;
-plot_name = "single_stim"; % or 'subplot' or 'p1_only'
+plot_name = "subplot"; % 'single_stim' or 'subplot' or 'p1_only'
 plot_frs(sim_name, pulse_amps, stim_amps, p, t, default_colors, ex_stim_j, ex_brain, ex_c, ex_trial, plot_name)
 %}
 
@@ -89,11 +80,11 @@ plot_sync(sim_names, pulse_amps, stim_amps, t, num_group, ...
 %}
 
 
-win_start = t_task + stim_ind*dt; % to account for onset spike of pulse
-win_stop = t_task + 0.1;
-ex_c = 0;
+win_start = t_taskoff - 0.1;%+ stim_ind*dt; % to account for onset spike of pulse
+win_stop = t_taskoff;
+ex_c = 25.6/100;
 %  plot_name = 'ex_c' or 'p1_wins' or 'p1_loses'
-plot_name = "p1_wins";
+plot_name = "p1_loses";
 plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_start, ...
                      win_stop, default_colors, brains, num_brains, ...
                      pulse_coherences, galvanic_coherences, control_coherences, ...

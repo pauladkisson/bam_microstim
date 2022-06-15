@@ -36,31 +36,28 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
             end
             load(strcat(output_stimpath, "/decisions.mat"), "final_decisions")
             if plot_name == "p1_wins"
-                num_wins = sum(final_decisions(:, stim_coherences==ex_c)==1, 'all');
+                num_wins = sum(final_decisions==1, 'all');
             elseif plot_name == "p1_loses"
-                num_wins = sum(final_decisions(:, stim_coherences==ex_c)==2, 'all');
+                num_wins = sum(final_decisions==2, 'all');
             else
                 num_wins = num_trials;
             end
-            for trial = start_trial:end_trial
-                relative_trial = trial - start_trial + 1;
-<<<<<<< HEAD
-                if (plot_name == "p1_wins" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 1) || ...
-                        (plot_name == "p1_loses" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 2)
-=======
-                if (final_decisions(relative_trial, stim_coherences==ex_c) ~= 1 && plot_name == "p1_wins") || ...
-                        (final_decisions(relative_trial, stim_coherences==ex_c) ~= 2 && plot_name == "p1_loses")
->>>>>>> 50d200f4fda53668a87df9c65f3f4f6722acd698
-                    continue
-                end  
-                load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [ex_c, trial])), ...
-                    "recspikes")
-                g1_taskfrs = zeros(num_group, 1);
-                for nn = 1:num_group
-                    spiketimes = t(recspikes(int2str(nn)));
-                    g1_taskfrs(nn) = sum(spiketimes>=win_start & spiketimes<win_stop) / (win_stop - win_start);
+            for ex_c = stim_coherences
+                for trial = start_trial:end_trial
+                    relative_trial = trial - start_trial + 1;
+                    if (plot_name == "p1_wins" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 1) || ...
+                            (plot_name == "p1_loses" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 2)
+                        continue
+                    end
+                    load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [ex_c, trial])), ...
+                        "recspikes")
+                    g1_taskfrs = zeros(num_group, 1);
+                    for nn = 1:num_group
+                        spiketimes = t(recspikes(int2str(nn)));
+                        g1_taskfrs(nn) = sum(spiketimes>=win_start & spiketimes<win_stop) / (win_stop - win_start);
+                    end
+                    stim_frs(j, brain, :) = reshape(stim_frs(j, brain, :), size(g1_taskfrs)) + g1_taskfrs ./ num_wins;
                 end
-                stim_frs(j, brain, :) = reshape(stim_frs(j, brain, :), size(g1_taskfrs)) + g1_taskfrs ./ num_wins;
             end
         end
     end

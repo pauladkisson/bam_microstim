@@ -87,12 +87,6 @@ function plot_decisions(sim_name, pulse_amps, stim_amps, default_colors, brains,
     beta_ratios = [pulse_beta_ratio; galvanic_beta_ratio; ctrl_beta_ratio];
     [~, p, stats] = anovan(beta_ratios, groups, 'display', 'off');
     c_val = multcompare(stats, 'display', 'off')
-    figure;
-    hold on
-    scatter(rand(size(pulse_beta_ratio)), pulse_beta_ratio, [], default_colors(7, :).*ones(length(pulse_beta_ratio), 3))
-    scatter(rand(size(galvanic_beta_ratio)), galvanic_beta_ratio, [], default_colors(5, :).*ones(length(galvanic_beta_ratio), 3))
-    scatter(rand(size(ctrl_beta_ratio)), ctrl_beta_ratio, "k")
-    hold off
     
     %Decision Times
     pulse_dt = zeros(length(brains), length(pulse_coherences));
