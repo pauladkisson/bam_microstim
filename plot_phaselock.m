@@ -1,7 +1,7 @@
 %%% Paul Adkisson
 %%% 2/14/2022
 %%% Plot Phase Locking
-function plot_phaselock(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, num_group, ...
+function plot_phaselock(sim_names, pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, num_group, ...
                         idx_diff, default_colors, brains, num_brains, ...
                         pulse_coherences, galvanic_coherences, control_coherences, ...
                         start_trial, end_trial, num_trials)
@@ -9,7 +9,7 @@ function plot_phaselock(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, 
     pulsetimes = t_task:1/stim_freq:t_taskoff;
     figure(1);
     hold on
-    for sim_name = ["EMBC Disconnected", "EMBC I_b100"]
+    for sim_name = sim_names
         stim_sync = zeros(length(stim_amps), num_brains, num_group);
         for brain = brains
             fprintf("brain %0.0f \n", brain)
@@ -36,7 +36,7 @@ function plot_phaselock(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, 
                     end
                 end
                 load(strcat(output_stimpath, "/decisions.mat"), "final_decisions")
-                if sim_name == "EMBC I_b100"
+                if ~contains(sim_name, "Discon")
                     num_wins = sum(final_decisions(:, stim_coherences==0)==1, 'all') * ones(num_group, 1);
                 else
                     num_wins = num_trials * ones(num_group, 1);
@@ -46,7 +46,7 @@ function plot_phaselock(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, 
                     nan_neurons = zeros(num_trials, num_group);
                     for trial = start_trial:end_trial
                         relative_trial = trial - start_trial + 1;
-                        if sim_name=="EMBC I_b100" && final_decisions(relative_trial, stim_coherences==c) ~= 1
+                        if ~contains(sim_name, "Discon") && final_decisions(relative_trial, stim_coherences==c) ~= 1
                             continue %skip trials where P1 doesn't win
                         end
                         load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [c, trial])), ...
@@ -104,7 +104,7 @@ function plot_phaselock(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, 
         figure(1);
         %figure;
         hold on
-        if sim_name == "EMBC Disconnected"
+        if contains(sim_name, "Discon")
             scatter(tot_ball_rs(~tot_pulse_nan)*1e6, tot_pulse_sync(~tot_pulse_nan), [], default_colors(7, :), 'filled')
             scatter(tot_ball_rs(~tot_galvanic_nan)*1e6, tot_galvanic_sync(~tot_galvanic_nan), [], default_colors(5, :), 'filled')
             scatter(tot_ctrl_ball_r(~tot_ctrl_nan)*1e6, tot_ctrl_sync(~tot_ctrl_nan), [], "k", 'filled')
@@ -134,7 +134,7 @@ function plot_phaselock(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, 
         pulse_norm_bar = mean(pulse_norm_mean)
         pulse_norm_sem = std(pulse_norm_mean) ./ sqrt(length(pulse_norm_mean))
 
-        if sim_name == "EMBC I_b100"
+        if ~contains(sim_name, "Discon")
             connected_stim_means = stim_means;
             connected_gs_norm_mean = galvanic_norm_mean;
             connected_ps_norm_mean = pulse_norm_mean;

@@ -1,7 +1,7 @@
 %%% Paul Adkisson
 %%% 2/14/2022
 %%% Plot Coefficient of Variation (CV)
-function plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
+function plot_cv(sim_name, sim_names, pulse_amps, stim_amps, t, N, top_N, num_group, ...
                  win_size, cv_window, default_colors, ex_brain, ex_c, ex_trial, ...
                  ex_neuron, brains, num_brains, pulse_coherences, galvanic_coherences, control_coherences, ...
                  start_trial, end_trial, num_trials, plot_name)
@@ -74,7 +74,7 @@ function plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
     elseif plot_name == "p1_wins"
         ball_rs = zeros(num_brains, num_group);
         figure(1);
-        for sim_name = ["EMBC I_b100", "EMBC Disconnected"]
+        for sim_name = sim_names
             stim_cv = zeros(length(stim_amps), num_brains, num_group);
             for brain = brains
                 fprintf("brain %0.0f \n", brain)
@@ -101,7 +101,7 @@ function plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
                         end
                     end
                     load(strcat(output_stimpath, "/decisions.mat"), "final_decisions")
-                    if sim_name == "EMBC I_b100"
+                    if ~contains(sim_name, "Discon")
                         num_wins = sum(final_decisions(:, stim_coherences==0)==1, 'all') * ones(num_group, 1);
                     else
                         num_wins = num_trials;
@@ -110,7 +110,7 @@ function plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
                     c = 0;
                     for trial = start_trial:end_trial
                         relative_trial = trial - start_trial + 1;
-                        if sim_name=="EMBC I_b100" && final_decisions(relative_trial, stim_coherences==c) ~= 1
+                        if ~contains(sim_name, "Discon") && final_decisions(relative_trial, stim_coherences==c) ~= 1
                             continue %skip trials where P1 doesn't win
                         end
                         load(strcat(output_stimpath, sprintf("/c=%0.3f/trial%0.0f.mat", [c, trial])), ...
@@ -140,7 +140,7 @@ function plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
                         num_wins(nan_cv) = num_wins(nan_cv) - 1;
                         stim_cv(j, brain, ~nan_cv) = reshape(stim_cv(j, brain, ~nan_cv), size(cv)) + cv;
                     end
-                    if sim_name == "EMBC I_b100"
+                    if ~contains(sim_name, "Discon")
                         stim_cv(j, brain, :) = reshape(stim_cv(j, brain, :), size(num_wins)) ./ num_wins;
                     else
                         stim_cv(j, brain, :) = stim_cv(j, brain, :) / num_wins;
@@ -187,7 +187,7 @@ function plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
             ylabel("Coefficient of Variation (unitless)")
             title(strcat(sim_name, ": Full P1"))
 
-            if sim_name == "EMBC Disconnected"
+            if contains(sim_name, "Discon")
                 figure(1);
                 hold on
                 scatter(tot_ball_rs*1e6, tot_pulse_cv, [], default_colors(7, :), 'filled')
@@ -222,7 +222,7 @@ function plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
             pulse_norm_bar = mean(pulse_norm_mean)
             pulse_norm_sem = std(pulse_norm_mean) ./ sqrt(length(pulse_norm_mean))
 
-            if sim_name == "EMBC I_b100"
+            if ~contains(sim_name, "Discon")
                 connected_stim_means = stim_means;
                 connected_gs_norm_mean = galvanic_norm_mean;
                 connected_ps_norm_mean = pulse_norm_mean;

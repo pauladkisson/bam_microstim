@@ -231,7 +231,7 @@ function plot_sync(sim_names, pulse_amps, stim_amps, t, num_group, ...
         max_gs_num_sync_o_sync = max(gs_num_sync_of_synced)
         
         %save for comparison connected vs disconnected
-        if sim_name == "EMBC Disconnected"
+        if contains(sim_name, "Discon")
             discon_perc_synced = ps_perc_synced;
             discon_perc_atleastX = ps_perc_atleastX;
             discon_perc_syncNphase = ps_perc_phase_n_sync;
@@ -267,7 +267,7 @@ function plot_sync(sim_names, pulse_amps, stim_amps, t, num_group, ...
         tot_gs_sync = reshape(max_gs_sync, [total_N, 1]);
         max_ctrl_sync = max(control_sync, [], 2);
         tot_ball_rs = reshape(ball_rs, [total_N, 1]);
-        if sim_name == "EMBC Disconnected"
+        if contains(sim_name, "Discon")
             shape = "o";
         else
             shape = "^";

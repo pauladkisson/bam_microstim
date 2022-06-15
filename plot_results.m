@@ -43,20 +43,25 @@ plot_rasters(sim_name, pulse_amps, stim_amps, ex_neurons, t, t_task, t_taskoff, 
 
 %{
 win_size = floor(0.250 / dt); %250ms moving window
-%cv_window = t >= 2.5 & t<3; %Plotting window
-cv_window = t >= t_task & t<t_taskoff; %Plotting window
+cv_window = t >= 2.5 & t<3; %Plotting window
+%cv_window = t >= t_task & t<t_taskoff; %Plotting window
 ex_neuron = 7;
+ex_brain = 1;
+ex_trial = 1;
 top_N = floor(num_group);
 plot_name = "p1_wins"; % or 'ex_trial' or 'p1_wins'
-plot_cv(sim_name, pulse_amps, stim_amps, t, N, top_N, num_group, ...
+sim_names = ["EMBC I_b100", "EMBC Disconnected"];
+%sim_names = ["%Activation Equivalence Connected", "%Activation Equivalence Disconnected"];
+plot_cv(sim_name, sim_names, pulse_amps, stim_amps, t, N, top_N, num_group, ...
                  win_size, cv_window, default_colors, ex_brain, ex_c, ex_trial, ...
                  ex_neuron, brains, num_brains, pulse_coherences, galvanic_coherences, control_coherences, ...
                  start_trial, end_trial, num_trials, plot_name)
 %}
 
 %{
+sim_names = ["%Activation Equivalence Connected", "%Activation Equivalence Disconnected"];
 idx_diff = stim_ind+1;% how far off timing is from pulse timing + 1 to account for t(1) = 0
-plot_phaselock(pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, num_group, ...
+plot_phaselock(sim_names, pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, num_group, ...
                         idx_diff, default_colors, brains, num_brains, ...
                         pulse_coherences, galvanic_coherences, control_coherences, ...
                         start_trial, end_trial, num_trials)
@@ -71,7 +76,7 @@ c_win = 300*1e-6;
 c = 0;
 brains = [1, 2];
 num_brains = 2;
-sim_names = ["EMBC I_b100", "EMBC Disconnected"];
+sim_names = ["%Activation Equivalence Connected", "%Activation Equivalence Disconnected"];
 plot_sync(sim_names, pulse_amps, stim_amps, t, num_group, ...
                         brains, num_brains, N_start, N_end, ...
                         win_start, win_stop, c_win, c, ...
@@ -80,11 +85,11 @@ plot_sync(sim_names, pulse_amps, stim_amps, t, num_group, ...
 %}
 
 
-win_start = t_taskoff - 0.1;%+ stim_ind*dt; % to account for onset spike of pulse
+win_start = t_taskoff-0.1; %+ stim_ind*dt; % to account for onset spike of pulse
 win_stop = t_taskoff;
-ex_c = 25.6/100;
+ex_c = 0;
 %  plot_name = 'ex_c' or 'p1_wins' or 'p1_loses'
-plot_name = "p1_loses";
+plot_name = "p1_wins";
 plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_start, ...
                      win_stop, default_colors, brains, num_brains, ...
                      pulse_coherences, galvanic_coherences, control_coherences, ...

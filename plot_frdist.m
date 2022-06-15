@@ -37,12 +37,15 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
             load(strcat(output_stimpath, "/decisions.mat"), "final_decisions")
             if plot_name == "p1_wins"
                 num_wins = sum(final_decisions==1, 'all');
+                analyze_coherences = stim_coherences;
             elseif plot_name == "p1_loses"
                 num_wins = sum(final_decisions==2, 'all');
+                analyze_coherences = stim_coherences;
             else
                 num_wins = num_trials;
+                analyze_coherences = ex_c;
             end
-            for ex_c = stim_coherences
+            for ex_c = analyze_coherences
                 for trial = start_trial:end_trial
                     relative_trial = trial - start_trial + 1;
                     if (plot_name == "p1_wins" && final_decisions(relative_trial, stim_coherences==ex_c) ~= 1) || ...
