@@ -1,9 +1,10 @@
 %clear;
-sim_name = "EMBC I_b100";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 figure;
 default_colors = get(gca, "colororder");
+%{
 start_trial = 1;
 end_trial = 36;
 num_trials = end_trial - start_trial + 1;
@@ -21,8 +22,8 @@ pulse_coherences = [0];
 control_coherences = [0];
 galvanic_coherences = [0];
 %}
-pulse_amps = [-10*1e-6];
-dc_amps = [-28, 0]*1e-9;
+pulse_amps = [-5*1e-6];
+dc_amps = [-40, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 
 %{
@@ -30,7 +31,7 @@ ex_c = 0/100;
 ex_trial = 1;
 ex_brain = 1;
 ex_stim_j = 1;
-plot_name = "subplot"; % 'single_stim' or 'subplot' or 'p1_only'
+plot_name = "single_stim"; % 'single_stim' or 'subplot' or 'p1_only'
 plot_frs(sim_name, pulse_amps, stim_amps, p, t, default_colors, ex_stim_j, ex_brain, ex_c, ex_trial, plot_name)
 %}
 
@@ -50,7 +51,7 @@ ex_brain = 1;
 ex_trial = 1;
 top_N = floor(num_group);
 plot_name = "p1_wins"; % or 'ex_trial' or 'p1_wins'
-sim_names = ["EMBC I_b100", "EMBC Disconnected"];
+sim_names = ["DepolBlockCon", "DepolBlockDiscon"];
 %sim_names = ["%Activation Equivalence Connected", "%Activation Equivalence Disconnected"];
 plot_cv(sim_name, sim_names, pulse_amps, stim_amps, t, N, top_N, num_group, ...
                  win_size, cv_window, default_colors, ex_brain, ex_c, ex_trial, ...
@@ -59,7 +60,7 @@ plot_cv(sim_name, sim_names, pulse_amps, stim_amps, t, N, top_N, num_group, ...
 %}
 
 %{
-sim_names = ["%Activation Equivalence Connected", "%Activation Equivalence Disconnected"];
+sim_names = ["DepolBlockCon", "DepolBlockDiscon"];
 idx_diff = stim_ind+1;% how far off timing is from pulse timing + 1 to account for t(1) = 0
 plot_phaselock(sim_names, pulse_amps, stim_amps, t, t_task, t_taskoff, stim_freq, num_group, ...
                         idx_diff, default_colors, brains, num_brains, ...
@@ -74,9 +75,7 @@ win_start = 2.5;
 win_stop = 3;
 c_win = 300*1e-6;
 c = 0;
-brains = [1, 2];
-num_brains = 2;
-sim_names = ["%Activation Equivalence Connected", "%Activation Equivalence Disconnected"];
+sim_names = ["DepolBlockCon", "DepolBlockDiscon"];
 plot_sync(sim_names, pulse_amps, stim_amps, t, num_group, ...
                         brains, num_brains, N_start, N_end, ...
                         win_start, win_stop, c_win, c, ...
@@ -85,11 +84,12 @@ plot_sync(sim_names, pulse_amps, stim_amps, t, num_group, ...
 %}
 
 
-win_start = t_taskoff-0.1; %+ stim_ind*dt; % to account for onset spike of pulse
-win_stop = t_taskoff;
+win_start = t_task + stim_ind*dt; % to account for onset spike of pulse
+win_stop = t_task + 0.1;
 ex_c = 0;
 %  plot_name = 'ex_c' or 'p1_wins' or 'p1_loses'
-plot_name = "p1_wins";
+plot_name = "ex_c";
+num_brains = length(brains);
 plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_start, ...
                      win_stop, default_colors, brains, num_brains, ...
                      pulse_coherences, galvanic_coherences, control_coherences, ...

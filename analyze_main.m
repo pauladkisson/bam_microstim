@@ -2,22 +2,23 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "DepolBlockCon";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 
-
+%{
 start_trial = 1;
 end_trial = 36;
 brains = 1:10;
 %}
 trials = start_trial:end_trial;
 num_trials = length(trials);
-reconstruct = false;
+reconstruct = true;
 num_batch = 3;
 batch_size = floor(length(trials) / num_batch);
-logistic_regression = true;
+logistic_regression = false;
 
+%{
 pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
 control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
 galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
@@ -145,12 +146,14 @@ for brain = brains
             percent_earlydec(i) = sum(decision_times(:, i)<=0, 'all') / end_trial;
             coherent_fin_decs = final_decisions(final_decisions(:, i)~=0, i);
             avg_final_acc(i) = sum(coherent_fin_decs == 1) / length(coherent_fin_decs);
+            %{
             if stim_amp == 0 %batch for control
                 for batch = 1:num_batch
                     batch_idx = 1+(batch-1)*batch_size:batch*batch_size;
                     batch_final_acc(i, batch) = sum(coherent_fin_decs(batch_idx)==1) / batch_size;
                 end
             end
+            %}
 
             %Breakdown DTs by outcome
             avg_correct_dts(i) = mean(coherent_times(coherent_decisions==1));
