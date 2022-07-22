@@ -123,6 +123,7 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
     galvanic_affected = galvanic_brainfrs > ctrl_mean + ctrl_std*3;
     pulse_percent_affected = sum(pulse_affected, 2) / size(pulse_affected, 2)
     galvanic_percent_affected = sum(galvanic_affected, 2) / size(galvanic_affected, 2)
+    [~, p_perc_act] = ttest2(pulse_percent_affected, galvanic_percent_affected)
 
     % %of neurons affected by pulse by also affected by galvanic
     num_affected = 0;

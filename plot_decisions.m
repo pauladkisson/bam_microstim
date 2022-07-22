@@ -62,18 +62,19 @@ function plot_decisions(sim_name, pulse_amps, stim_amps, default_colors, brains,
 
     figure;
     hold on
-    errorbar(pulse_coherences, mean(pulse_acc, 1), std(pulse_acc, [], 1)/sqrt(num_brains), 'Color', default_colors(7, :))
-    errorbar(galvanic_coherences, mean(galvanic_acc, 1), std(galvanic_acc, [], 1)/sqrt(num_brains), 'Color', default_colors(5, :))
-    plot(control_coherences, ctrl_acc, 'ko-')
-    scatter(pulse_coherences, pulse_acc', [], default_colors(7, :).*ones(length(pulse_acc), 3))
-    scatter(galvanic_coherences, galvanic_acc', [], default_colors(5, :).*ones(length(pulse_acc), 3))
-    plot(c, w_ctrl, "k")
-    plot(c, w_galvanic, 'Color', default_colors(5, :))
-    plot(c, w_pulse, 'Color', default_colors(7, :))
+    %errorbar(pulse_coherences, mean(pulse_acc, 1), std(pulse_acc, [], 1)/sqrt(num_brains), 'Color', default_colors(7, :))
+    %errorbar(galvanic_coherences, mean(galvanic_acc, 1), std(galvanic_acc, [], 1)/sqrt(num_brains), 'Color', default_colors(5, :))
+    %plot(control_coherences, ctrl_acc, 'ko-')
+    scatter(control_coherences, ctrl_acc, 'k', 'filled')
+    scatter(pulse_coherences, pulse_acc', [], default_colors(7, :).*ones(length(pulse_acc), 3), 'filled')
+    scatter(galvanic_coherences, galvanic_acc', [], default_colors(5, :).*ones(length(pulse_acc), 3), 'filled')
+    plot(c, mean(w_ctrl, 1), "k")
+    plot(c, mean(w_galvanic, 1), 'Color', default_colors(5, :))
+    plot(c, mean(w_pulse, 1), 'Color', default_colors(7, :))
     hold off
     xlabel("Coherence (%)")
     ylabel("% of trials P1 wins")
-    legend("Pulsatile", "Galvanic", "Control")
+    %legend("Pulsatile", "Galvanic", "Control")
 
     %Stats
     beta0 = true_ctrl_coeffs(1);
@@ -124,13 +125,15 @@ function plot_decisions(sim_name, pulse_amps, stim_amps, default_colors, brains,
     hold on
     errorbar(pulse_coherences, mean(pulse_dt, 1), std(pulse_dt, [], 1)/sqrt(num_brains), 'Color', default_colors(7, :))
     errorbar(galvanic_coherences, mean(galvanic_dt, 1), std(galvanic_dt, [], 1)/sqrt(num_brains), 'Color', default_colors(5, :))
-    plot(control_coherences, ctrl_dt, 'ko-')
-    scatter(pulse_coherences, pulse_dt', [], default_colors(7, :).*ones(length(pulse_dt), 3))
-    scatter(galvanic_coherences, galvanic_dt', [], default_colors(5, :).*ones(length(pulse_dt), 3))
+    plot(control_coherences, ctrl_dt, 'k')
+    scatter(control_coherences, ctrl_dt, 'k', 'filled')
+    scatter(pulse_coherences, pulse_dt', [], default_colors(7, :).*ones(length(pulse_dt), 3), 'filled')
+    scatter(galvanic_coherences, galvanic_dt', [], default_colors(5, :).*ones(length(pulse_dt), 3), 'filled')
     hold off
     xlabel("Coherence (%)")
     ylabel("Decision Time (s)")
     legend("Pulsatile", "Galvanic", "Control")
+    %ylim([0, 1])
 
     %Stats
     norm_pulse_dt = mean(pulse_dt, 2) - mean(ctrl_dt);

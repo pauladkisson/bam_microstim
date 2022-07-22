@@ -1,38 +1,43 @@
 %clear;
-sim_name = "Test";
+sim_name = "%Activation Equivalence Connected";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 figure;
 default_colors = get(gca, "colororder");
-%{
+
 start_trial = 1;
-end_trial = 36;
+end_trial = 12;
 num_trials = end_trial - start_trial + 1;
 brains = 1:10;
 num_brains = length(brains);
 num_batch = 3;
 
-pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
+%pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
 control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
-galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+%galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+%pulse_coherences = [-78.8, -51.2, -42.6, -36.2, 0]/100;
 %galvanic_coherences = [-100, -75.6, -51.2, -25.6, 0, 25.6] / 100;
+%pulse_coherences = [-100, -90, -78.8, -75.6, -51.2, -25.6, 0] / 100;
+%galvanic_coherences = [-100, -90, -78.8, -75.6, -51.2, -25.6, 0] / 100;
+pulse_coherences = [-100, -90, -78.8, -51.2, -25.6, 0] / 100;
+galvanic_coherences = [-100, -90, -78.8, -51.2, -25.6, 0] / 100; %omit 75.6% bc I forgot to change f-->0.15
 %}
 %{
 pulse_coherences = [0];
 control_coherences = [0];
 galvanic_coherences = [0];
 %}
-pulse_amps = [-5*1e-6];
+pulse_amps = [-3.5*1e-6];
 dc_amps = [-40, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 
 %{
-ex_c = 0/100;
+ex_c = -51.2/100;
 ex_trial = 1;
 ex_brain = 1;
-ex_stim_j = 1;
-plot_name = "single_stim"; % 'single_stim' or 'subplot' or 'p1_only'
-plot_frs(sim_name, pulse_amps, stim_amps, p, t, default_colors, ex_stim_j, ex_brain, ex_c, ex_trial, plot_name)
+ex_stim_j = 2;
+plot_name = "subplot"; % 'single_stim' or 'subplot' or 'p1_only'
+plot_frs(sim_name, pulse_amps, stim_amps, p, t, t_task, t_taskoff, default_colors, ex_stim_j, ex_brain, ex_c, ex_trial, plot_name)
 %}
 
 %{

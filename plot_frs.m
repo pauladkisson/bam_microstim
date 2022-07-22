@@ -1,7 +1,7 @@
 %%% Paul Adkisson
 %%% 2/14/2022
 %%% Plot example Population Firing Rates
-function plot_frs(sim_name, pulse_amps, stim_amps, p, t, default_colors, ...
+function plot_frs(sim_name, pulse_amps, stim_amps, p, t, t_task, t_taskoff, default_colors, ...
                   ex_stim_j, ex_brain, ex_c, ex_trial, plot_name)
     if plot_name == "single_stim"
         pulse = ex_stim_j<=length(pulse_amps);
@@ -23,6 +23,8 @@ function plot_frs(sim_name, pulse_amps, stim_amps, p, t, default_colors, ...
         for i = 1:p+2
             plot(t, pop_frs(:, i))
         end
+        xline(t_task, 'k--')
+        xline(t_taskoff, 'k--')
         hold off
         xlabel("Time (s)")
         ylabel("Population Firing Rate (Hz)")
