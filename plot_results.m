@@ -1,14 +1,14 @@
 %clear;
-sim_name = "%Activation Equivalence Connected";
+sim_name = "Test";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 figure;
 default_colors = get(gca, "colororder");
 
 start_trial = 1;
-end_trial = 12;
+end_trial = 36;
 num_trials = end_trial - start_trial + 1;
-brains = 1:10;
+brains = 1;
 num_brains = length(brains);
 num_batch = 3;
 
@@ -27,8 +27,8 @@ pulse_coherences = [0];
 control_coherences = [0];
 galvanic_coherences = [0];
 %}
-pulse_amps = [-3.5*1e-6];
-dc_amps = [-40, 0]*1e-9;
+pulse_amps = [-10*1e-6];
+dc_amps = [-2200, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 
 %{

@@ -14,7 +14,7 @@ dt = 0.05e-3; %ms
 t_span = 4;
 t = 0:dt:t_span;
 start_trial = 1;
-end_trial = 12;
+end_trial = 36;
 
 %% Network Parameters
 %percent_size = 0.5;
@@ -82,8 +82,8 @@ stim_ind = floor(stim_duration*2 / dt);
 stim_freq = 200; %Hz
 depol_block_thresh = 800*1e-12;
 depol_block_factor = 3;
-pulse_amps = [-5*1e-6];
-dc_amps = [-40, 0]*1e-9;
+pulse_amps = [-10]*1e-6;
+dc_amps = [-2200, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
                   depol_block_thresh, depol_block_factor, pulse_amps, ...

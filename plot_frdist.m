@@ -85,7 +85,7 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
     hold off
     xlabel("Distance from Electrode (um)")
     ylabel("Firing Rate (spk/s)")
-    if sim_name == "EMBC Disconnected" || sim_name == "DepolBlockDiscon"
+    if sim_name == "EMBC Disconnected" || sim_name == "DepolBlockDiscon" || sim_name == "Test"
         title("Disconnected")
     else
         title("Connected")
@@ -110,7 +110,7 @@ function plot_frdist(sim_name, ex_c, pulse_amps, stim_amps, t, num_group, win_st
     xticks([1, 2])
     xticklabels(["Galvanic", "Pulsatile"])
     ylabel("Change in Firing Rate (spk/s)")
-    if sim_name == "EMBC Disconnected" || sim_name == "DepolBlockDiscon"
+    if sim_name == "EMBC Disconnected" || sim_name == "DepolBlockDiscon" || sim_name == "Test"
         title("Disconnected")
     else
         title("Connected")
