@@ -32,15 +32,15 @@ for brain = brains
             output_stimpath = strcat(brainpath, sprintf("/data/%0.1fnA_galvanic", stim_amp*1e9));
             stim_coherences = control_coherences;
         end
-        load(input_stimpath)
+        load(input_stimpath, 'I_ustim', 'Vmir')
         mkdir(output_stimpath)
         for c = stim_coherences
             fprintf("Coherence: %0.1f%% \n", c*100)
             input_coherentpath = sprintf("Simulation %s/spikes/c=%0.3f", sim_name, c);
             output_coherentpath = strcat(output_stimpath, sprintf("/c=%0.3f", c));
             mkdir(output_coherentpath)
-            parfor trial = start_trial:end_trial
-            %for trial = start_trial:end_trial
+            %parfor trial = start_trial:end_trial
+            for trial = start_trial:end_trial
                 fprintf("trial: %0.0f \n", trial)
                 input_trialpath = strcat(input_coherentpath, sprintf("/trial%0.0f/input.mat", trial));
                 output_trialpath = strcat(output_coherentpath, sprintf("/trial%0.0f.mat", trial));
@@ -51,6 +51,7 @@ for brain = brains
                 
                 %ustim
                 I_ustim_temp = I_ustim;
+                pblocked = zeros(1, N); %neurons blocked at the start of each pulse
 
                 %LIF variables
                 RP_ind = zeros(1, N);
@@ -88,7 +89,13 @@ for brain = brains
                     end
 
                     %Spiking Behavior
-                    is_spike = (Vm(i, :)>= Vs);
+                    if pulse
+                        in_pp_rp = RP_pp_ind~=0;
+                        in_ps_rp = RP_ps_ind~=0;
+                        is_spike = (Vm(i, :)>= Vs) & (~in_ps_rp | (I_ustim(i, :)>0 & ~in_pp_rp));
+                    else
+                        is_spike = (Vm(i, :)>= Vs);
+                    end
                     if any(is_spike)
                         Vm(i, is_spike) = 0; %draw spike
                         Vm(i+1, is_spike) = Vr;
@@ -105,24 +112,38 @@ for brain = brains
                         - s_nmda(i, :)/tau_NMDA_2);
                     x_nmda(i+1, :) = x_nmda(i, :) - dt*x_nmda(i, :)/tau_NMDA_1;
                     s_gaba(i+1, :) = s_gaba(i, :) - dt*s_gaba(i, :)/tau_GABA;
-
+                    
                     %Pulse Blocking Effects
                     if pulse
-                        in_pp_rp = RP_pp_ind~=0;
-                        in_ps_rp = RP_ps_ind~=0;
                         try
                             pulse_starters = I_ustim(i-1, :)==0 & I_ustim(i, :) ~= 0;
+                            pulse_flippers = I_ustim(i-1, :)~=0 & I_ustim(i-1, :)==-I_ustim(i, :);
+                            pulse_enders = I_ustim(i-1, :) < 0 & I_ustim(i, :) == 0;
                         catch
                             assert(i==1, "Known indexing issue")
                             pulse_starters = false;
+                            pulse_flippers = false;
+                            pulse_enders = false;
                         end
                         I_ustim_temp(i:i+stim_ind, in_pp_rp&pulse_starters) = 0;
-                        I_ch(in_ps_rp) = 0;
                     end
+                    %}
 
                     %Voltage update (for non-refractory neurons)
                     non_rp = (RP_ind==0);
                     in_rp = (~non_rp)&(~is_spike);
+                    if pulse
+                        if any(pulse_starters)
+                            pblocked(pulse_starters) = in_rp(pulse_starters) | in_pp_rp(pulse_starters);
+                        end
+                        pstart = pulse_starters&~pblocked;
+                        pflip = pulse_flippers&~pblocked&non_rp;
+                        pend = pulse_enders&~pblocked&non_rp;
+                        %mirror pulse estimate
+                        Vm(i, pstart) = Vm(i, pstart) + Vmir(pstart);
+                        Vm(i, pflip) = Vm(i, pflip) - 2*Vmir(pflip);
+                        Vm(i, pend) = Vm(i, pend) + Vmir(pend);
+                    end
                     dvdt = (-gL(pop_type).*(Vm(i, :)-EL) + I_ch + I_ustim_temp(i, :))./C(pop_type);
                     Vm(i+1, non_rp) = Vm(i, non_rp) + dvdt(non_rp)*dt;
                     Vm(i+1, in_rp) = Vr; %hold refractory neurons at Vr
@@ -135,10 +156,10 @@ for brain = brains
                             blocked_enders = pulse_enders & I_ustim_temp(i-1, :)==0;
                             unblocked_enders = pulse_enders & I_ustim_temp(i-1, :)~=0;
                             if any(blocked_enders)
-                                RP_pp_ind(blocked_enders) = RP_pp_ind(blocked_enders) + ...
-                                    get_blocked_RP(abs(I_ustim(i-1, blocked_enders)), I_b, t_pp, dt);
-                                RP_ps_ind(blocked_enders) = RP_ps_ind(blocked_enders) + ...
-                                    get_blocked_RP(abs(I_ustim(i-1, blocked_enders)), I_b, t_ps, dt);
+                                %neurons with pulse amplitudes large enough to experience residual pulse-pulse blocking
+                                pp_blockers = abs(I_ustim(i-1, :)) > I_b(min_pp_idx) & blocked_enders;
+                                RP_pp_ind(pp_blockers) = get_RP(abs(I_ustim(i-1, pp_blockers)), I_b, t_pp, dt) / 2;
+                                RP_ps_ind(blocked_enders) = get_RP(abs(I_ustim(i-1, blocked_enders)), I_b, t_ps, dt);
                             end
                             if any(unblocked_enders)
                                 RP_ps_ind(unblocked_enders) = get_RP(...
@@ -147,13 +168,16 @@ for brain = brains
                                     abs(I_ustim(i-1, unblocked_enders)), I_b, t_pp, dt);
                             end
                         catch
-                            assert(i <= stim_ind, "Known Indexing Error")
+                            assert(i <= stim_ind, "Pulse Refractory Error")
                         end
-                        RP_pp_ind(in_pp_rp) = RP_pp_ind(in_pp_rp) - 1;
-                        RP_ps_ind(in_ps_rp) = RP_ps_ind(in_ps_rp) - 1;
+                        %RP's cannot go below 0
+                        RP_pp_ind(in_pp_rp) = max(RP_pp_ind(in_pp_rp) - 1, 0);
+                        RP_ps_ind(in_ps_rp) = max(RP_ps_ind(in_ps_rp) - 1, 0);
                     end
+                    %}
                 end 
                 fast_parsave(output_trialpath, Vm);
+                %save(output_trialpath, 'Vm')
             end
         end
     end
@@ -182,9 +206,4 @@ end
 function RP_ind = get_RP(I_pulse, I_b, t_b, dt)
     RP = interp1(I_b, t_b, I_pulse);
     RP_ind = floor(RP / dt);
-end
-
-function RP_ind = get_blocked_RP(I_pulse, I_b, t_b, dt)
-    RP = interp1(I_b, t_b, I_pulse) .* (I_pulse / I_b(end)).^2*2;
-    RP_ind = floor(RP/dt);
 end

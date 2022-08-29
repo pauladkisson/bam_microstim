@@ -25,39 +25,11 @@ function GenerateBAM(brains, N_E, N_I, f, p, w_plus, w_minus, w, sim_path)
         ball_x = min_x + regular_x*group_idx+regular_x.*rand(1, num_group);
         ball_y = min_y + regular_y*group_idx+regular_y.*rand(1, num_group);
         ball_r = sqrt(ball_x.^2 + ball_y.^2);
-        axon_SA = 100*(1e-6^2); %Typical axon surface area = 100um^2
-        %electric_r = -axon_SA ./ (4*pi*ball_r.^2);
         electric_r = mirror_est(ball_r);
         
         brainpath = strcat(sim_path, sprintf("/brain%0.0f", brain));
         mkdir(brainpath)
         save(strcat(brainpath, "/r.mat"), "ball_r", "electric_r")
-        
-        %{
-        pulse_test_stim = -120*1e-9;
-        figure;
-        subplot(2, 1, 1)
-        scatter(ball_r*1e6, electric_r*pulse_test_stim*1e9)
-        title("Pulse Stimulation")
-        xlabel("Distance from Electrode to Neuron (um)")
-        ylabel("Stimulation Current (nA)")
-        subplot(2, 1, 2)
-        histogram(electric_r*pulse_test_stim*1e9, 48)
-        xlabel("Stimulation Current (nA)")
-        ylabel("Number of Neurons")
-
-        galvanic_test_stim = -28*1e-9;
-        figure;
-        subplot(2, 1, 1)
-        scatter(ball_r*1e6, electric_r*galvanic_test_stim*1e12)
-        title("Galvanic Stimulation")
-        xlabel("Distance from Electrode to Neuron (um)")
-        ylabel("Stimulation Current (pA)")
-        subplot(2, 1, 2)
-        histogram(electric_r*galvanic_test_stim*1e12, 24)
-        xlabel("Stimulation Current (pA)")
-        ylabel("Number of Neurons")
-        %}
     end
 end
 
@@ -69,9 +41,9 @@ function electric_r = mirror_est(z)
     delta_x = 100*D; %Internode Distance (m)
     x = delta_x*n; %node positions
     r = sqrt(x.^2 + z.^2); %distance from electrode to node (cm)
-    lif_gl = 25*1e-9;
+    gL = 25*1e-9;
     V_e = rho_e ./ (4*pi*z);
     V_es = rho_e ./ (4*pi*r);
-    V_e_bar = mean(V_es);
-    electric_r = (V_e_bar - V_e)*lif_gl; %electric_r = Vm_ss * (gL/I_el)
+    V_e_bar = mean(V_es, 1);
+    electric_r = (V_e_bar - V_e)*gL; %electric_r = Vm_ss/I_el
 end

@@ -14,11 +14,12 @@ dt = 0.05e-3; %ms
 t_span = 4;
 t = 0:dt:t_span;
 start_trial = 1;
-end_trial = 36;
+end_trial = 1;
 
 %% Network Parameters
 %percent_size = 0.5;
 percent_size = 0.15;
+%percent_size = 2/1600;
 N_E = floor(1600 * percent_size);
 %N_I = floor(400 * percent_size);
 N_I = 0;
@@ -80,10 +81,12 @@ alpha = 500; %Hz
 stim_duration = 300e-6; %us / phase
 stim_ind = floor(stim_duration*2 / dt);
 stim_freq = 200; %Hz
-depol_block_thresh = 800*1e-12;
+%depol_block_thresh = 800*1e-12;
+depol_block_thresh = 1; %no depol block
 depol_block_factor = 3;
 pulse_amps = [-10]*1e-6;
-dc_amps = [-2200, 0]*1e-9;
+%dc_amps = [-2200, 0]*1e-9;
+dc_amps = [];
 stim_amps = [pulse_amps, dc_amps];
 GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
                   depol_block_thresh, depol_block_factor, pulse_amps, ...
@@ -187,16 +190,48 @@ t_b = [0 0 0
 
 load('params_tPP_tPS_tSP_from_10_27_20.mat')
 best_tref_per_c = best_tref_per_c(1:size(t_b, 1), :);
-t_pp = best_tref_per_c(:, 1)*1e-3;
-t_ps = best_tref_per_c(:, 2)*1e-3;
-[min_ps, min_ps_idx] = min(t_ps(2:end));
-t_ps(1:min_ps_idx) = 0; %LIF model already accounts for low-amplitude insufficiency
+t_pp = best_tref_per_c(:, 2)*1e-3;
+t_pp = [t_pp; t_pp(end)];
+t_ps = best_tref_per_c(:, 1)*1e-3;
+t_ps = [t_ps; t_ps(end)];
 t_sp = best_tref_per_c(:, 3)*1e-3;
-I_b = t_b(:, 1)*100*1e-9/360;
+t_sp = [t_sp; t_sp(end)];
+z_thia = 0.002; %Thia's z=2mm
+elec_r_thia = mirror_est(z_thia);
+I_b = [t_b(:, 1)*1e-6*-elec_r_thia; 1]; %ensure interpolation always works
+[min_pp, min_pp_idx] = min(t_pp(2:end));
+
+load('Simulation Test/brain1/ustim/-10000.0nA_pulse.mat')
+load("Simulation Test/brain1/r.mat", 'ball_r')
+my_tpp = interp1(I_b, t_pp, Vmir.*gL(1));
+my_tps = interp1(I_b, t_ps, Vmir.*gL(1));
+figure;
+hold on
+%scatter(ball_r*1e6, my_tpp*1e3)
+scatter(ball_r*1e6, my_tps*1e3)
+yline(1/200*1e3)
+yline(1/100*1e3)
+xlabel("Distance From Electrode (um)")
+ylabel("Blocking Time (ms)") 
  
 %% Save
 save_path = strcat(sim_path, "/bam_constants.mat");
 save(save_path)
 toc
+
+function electric_r = mirror_est(z)
+    rho_e = 3; %extracellular resistivity (Ohm-m)
+    N = 25; %Number of nodes
+    n = (-(N-1)/2:(N-1)/2)'; %node numbers
+    D = 10*10^(-6); %Fiber Diameter (m)
+    delta_x = 100*D; %Internode Distance (m)
+    x = delta_x*n; %node positions
+    r = sqrt(x.^2 + z.^2); %distance from electrode to node (cm)
+    gL = 25*1e-9;
+    V_e = rho_e ./ (4*pi*z);
+    V_es = rho_e ./ (4*pi*r);
+    V_e_bar = mean(V_es, 1);
+    electric_r = (V_e_bar - V_e)*gL; %electric_r = Vm_ss/I_el
+end
 
 

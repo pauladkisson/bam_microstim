@@ -6,7 +6,7 @@ figure;
 default_colors = get(gca, "colororder");
 
 start_trial = 1;
-end_trial = 36;
+end_trial = 1;
 num_trials = end_trial - start_trial + 1;
 brains = 1;
 num_brains = length(brains);
@@ -90,7 +90,7 @@ plot_sync(sim_names, pulse_amps, stim_amps, t, num_group, ...
 
 
 win_start = t_task + stim_ind*dt; % to account for onset spike of pulse
-win_stop = t_task + 0.1;
+win_stop = t_task + 0.1 + stim_ind*dt;
 ex_c = 0;
 %  plot_name = 'ex_c' or 'p1_wins' or 'p1_loses'
 plot_name = "ex_c";
