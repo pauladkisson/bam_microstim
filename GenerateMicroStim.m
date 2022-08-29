@@ -2,8 +2,7 @@
 %%% 11.5.21
 %%% Purpose Generate micro-stimulation current
 function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
-                          depol_block_thresh, depol_block_factor, pulse_amps, ...
-                          dc_amps, N, num_group, brains, sim_path)
+                          pulse_amps, dc_amps, N, num_group, brains, sim_path)
     I_ustim_base = zeros(length(t), N);
     dt = t(2) - t(1);
     stim_amps = [pulse_amps, dc_amps];
@@ -38,15 +37,8 @@ function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
             if is_pulse
                 basepath = strcat(brainpath, "/ustim");
                 mkdir(basepath)
-                disp(strcat(basepath, sprintf("/%0.1fnA_pulse.mat", stim_amp*1e9)))
                 save(strcat(basepath, sprintf("/%0.1fnA_pulse.mat", stim_amp*1e9)), "I_ustim", 'Vmir')
             else
-                task_time = t>=t_task & t<t_taskoff;
-                super_thresh_neurons = I_ustim(t==t_task, :) > depol_block_thresh;
-                super_thresh_amps = I_ustim(t==t_task, super_thresh_neurons);
-                corrected_amps = super_thresh_amps - (super_thresh_amps - depol_block_thresh)*depol_block_factor;
-                corrected_amps = repmat(corrected_amps, sum(task_time), 1);
-                I_ustim(task_time, super_thresh_neurons) = corrected_amps;
                 basepath = strcat(brainpath, "/ustim");
                 mkdir(basepath)
                 save(strcat(basepath, sprintf("/%0.1fnA_galvanic.mat", stim_amp*1e9)), "I_ustim", 'Vmir')

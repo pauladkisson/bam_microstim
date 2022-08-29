@@ -113,8 +113,8 @@ for brain = brains
                     x_nmda(i+1, :) = x_nmda(i, :) - dt*x_nmda(i, :)/tau_NMDA_1;
                     s_gaba(i+1, :) = s_gaba(i, :) - dt*s_gaba(i, :)/tau_GABA;
                     
-                    %Pulse Blocking Effects
                     if pulse
+                        %Pulse Blocking Effects
                         try
                             pulse_starters = I_ustim(i-1, :)==0 & I_ustim(i, :) ~= 0;
                             pulse_flippers = I_ustim(i-1, :)~=0 & I_ustim(i-1, :)==-I_ustim(i, :);
@@ -126,8 +126,13 @@ for brain = brains
                             pulse_enders = false;
                         end
                         I_ustim_temp(i:i+stim_ind, in_pp_rp&pulse_starters) = 0;
+                    else
+                        %Depolarization Block
+                        I_tot = -gL(pop_type).*(Vm(i, :)-EL) + I_ch + I_ustim_temp(i, :);
+                        depol_blocked = I_tot > depol_block_thresh;
+                        I_ch(depol_blocked) = 0;
+                        I_ustim_temp(i, depol_blocked) = 0;
                     end
-                    %}
 
                     %Voltage update (for non-refractory neurons)
                     non_rp = (RP_ind==0);
@@ -174,7 +179,6 @@ for brain = brains
                         RP_pp_ind(in_pp_rp) = max(RP_pp_ind(in_pp_rp) - 1, 0);
                         RP_ps_ind(in_ps_rp) = max(RP_ps_ind(in_ps_rp) - 1, 0);
                     end
-                    %}
                 end 
                 fast_parsave(output_trialpath, Vm);
                 %save(output_trialpath, 'Vm')

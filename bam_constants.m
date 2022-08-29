@@ -81,16 +81,13 @@ alpha = 500; %Hz
 stim_duration = 300e-6; %us / phase
 stim_ind = floor(stim_duration*2 / dt);
 stim_freq = 200; %Hz
-%depol_block_thresh = 800*1e-12;
-depol_block_thresh = 1; %no depol block
-depol_block_factor = 3;
-pulse_amps = [-10]*1e-6;
-%dc_amps = [-2200, 0]*1e-9;
-dc_amps = [];
+depol_block_thresh = 1135*1e-12;
+%pulse_amps = [-10]*1e-6;
+pulse_amps = [];
+dc_amps = [-10]*1e-6;
 stim_amps = [pulse_amps, dc_amps];
 GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
-                  depol_block_thresh, depol_block_factor, pulse_amps, ...
-                  dc_amps, N, num_group, brains, sim_path);
+                  pulse_amps, dc_amps, N, num_group, brains, sim_path);
 
 %% Firing Rate Parameters
 win_size = 5e-3;
@@ -200,19 +197,6 @@ z_thia = 0.002; %Thia's z=2mm
 elec_r_thia = mirror_est(z_thia);
 I_b = [t_b(:, 1)*1e-6*-elec_r_thia; 1]; %ensure interpolation always works
 [min_pp, min_pp_idx] = min(t_pp(2:end));
-
-load('Simulation Test/brain1/ustim/-10000.0nA_pulse.mat')
-load("Simulation Test/brain1/r.mat", 'ball_r')
-my_tpp = interp1(I_b, t_pp, Vmir.*gL(1));
-my_tps = interp1(I_b, t_ps, Vmir.*gL(1));
-figure;
-hold on
-%scatter(ball_r*1e6, my_tpp*1e3)
-scatter(ball_r*1e6, my_tps*1e3)
-yline(1/200*1e3)
-yline(1/100*1e3)
-xlabel("Distance From Electrode (um)")
-ylabel("Blocking Time (ms)") 
  
 %% Save
 save_path = strcat(sim_path, "/bam_constants.mat");
