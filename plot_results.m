@@ -28,11 +28,12 @@ control_coherences = [0];
 galvanic_coherences = [0];
 %}
 pulse_amps = [-10*1e-6];
-dc_amps = [-5000, 0]*1e-9;
+dc_amps = [-1500, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 
-%{
-ex_c = -51.2/100;
+
+%ex_c = -51.2/100;
+ex_c = -1;
 ex_trial = 1;
 ex_brain = 1;
 ex_stim_j = 2;

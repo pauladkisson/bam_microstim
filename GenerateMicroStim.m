@@ -3,6 +3,7 @@
 %%% Purpose Generate micro-stimulation current
 function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
                           pulse_amps, dc_amps, N, num_group, brains, sim_path)
+    thresh_cor = 0.25; %Threshold correction factor for pulses
     I_ustim_base = zeros(length(t), N);
     dt = t(2) - t(1);
     stim_amps = [pulse_amps, dc_amps];
@@ -35,6 +36,8 @@ function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
             Vmir = true_amps ./ gL;
             
             if is_pulse
+                I_ustim = I_ustim * thresh_cor;
+                Vmir = Vmir * thresh_cor;
                 basepath = strcat(brainpath, "/ustim");
                 mkdir(basepath)
                 save(strcat(basepath, sprintf("/%0.1fnA_pulse.mat", stim_amp*1e9)), "I_ustim", 'Vmir')
