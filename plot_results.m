@@ -6,7 +6,7 @@ figure;
 default_colors = get(gca, "colororder");
 
 start_trial = 1;
-end_trial = 1;
+end_trial = 12;
 num_trials = end_trial - start_trial + 1;
 brains = 1;
 num_brains = length(brains);

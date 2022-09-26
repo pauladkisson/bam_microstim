@@ -3,7 +3,7 @@
 %%% Purpose Generate micro-stimulation current
 function GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...
                           pulse_amps, dc_amps, N, num_group, brains, sim_path)
-    thresh_cor = 0.25; %Threshold correction factor for pulses
+    thresh_cor = 0.225; %Threshold correction factor for pulses
     I_ustim_base = zeros(length(t), N);
     dt = t(2) - t(1);
     stim_amps = [pulse_amps, dc_amps];

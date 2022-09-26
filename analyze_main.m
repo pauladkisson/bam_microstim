@@ -8,7 +8,7 @@ load(strcat(sim_path, "/bam_constants.mat"))
 
 
 start_trial = 1;
-end_trial = 1;
+end_trial = 12;
 brains = 1;
 %}
 trials = start_trial:end_trial;
