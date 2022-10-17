@@ -14,7 +14,7 @@ dt = 0.05e-3; %ms
 t_span = 4;
 t = 0:dt:t_span;
 start_trial = 1;
-end_trial = 12;
+end_trial = 1;
 
 %% Network Parameters
 %percent_size = 0.5;
@@ -50,12 +50,12 @@ G_ampa_ext = [2.1, 1.62]*1e-9; %nS
 %pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
 %control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
 %galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
-%pulse_coherences = [0] / 100;
-%control_coherences = [0] / 100;
-%galvanic_coherences = [0] / 100;
-pulse_coherences = [-100] / 100;
-control_coherences = [-100] / 100;
-galvanic_coherences = [-100] / 100;
+pulse_coherences = [0] / 100;
+control_coherences = [0] / 100;
+galvanic_coherences = [0] / 100;
+%pulse_coherences = [-100] / 100;
+%control_coherences = [-100] / 100;
+%galvanic_coherences = [-100] / 100;
 coherences = union(union(pulse_coherences, galvanic_coherences), control_coherences, 'sorted');
 max_fr_task = 80;
 t_task = 1;
@@ -87,7 +87,7 @@ stim_freq = 200; %Hz
 depol_block_thresh = 1135*1e-12;
 pulse_amps = [-10]*1e-6;
 %pulse_amps = [];
-dc_amps = [-1.5, 0]*1e-6;
+dc_amps = [-1, 0]*1e-6;
 %dc_amps = [];
 stim_amps = [pulse_amps, dc_amps];
 GenerateMicroStim(t, t_task, t_taskoff, stim_duration, stim_freq, ...

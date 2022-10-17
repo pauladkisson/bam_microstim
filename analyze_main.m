@@ -2,36 +2,50 @@
 %%% 9.6.21
 %%% Purpose: Calculate decision time and accuracy from population firing
 %%% rates
-sim_name = "Test";
+sim_name = "FeedforwardGamma";
 sim_path = sprintf("Simulation %s", sim_name);
 load(strcat(sim_path, "/bam_constants.mat"))
 
 
 start_trial = 1;
-end_trial = 12;
+end_trial = 28;
 brains = 1;
-%}
+
 trials = start_trial:end_trial;
 num_trials = length(trials);
-reconstruct = true;
+reconstruct = false;
 num_batch = 3;
 batch_size = floor(length(trials) / num_batch);
-logistic_regression = false;
+logistic_regression = true;
 
-%{
+
 %pulse_coherences = [-100, -78.8, -75.6, -72.4, -69.2, -66, -51.2, -25.6, 0, 25.6] / 100;
-control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
-galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
-pulse_coherences = [-78.8, -51.2, -42.6, -36.2, 0]/100;
+%control_coherences = [-100, -51.2, -25.6, -12.8, -6.4, -3.2, 0, 3.2, 6.4, 12.8, 25.6] / 100;
+%galvanic_coherences = [-100, -51.2 -42.6, -39.4, -36.2, -33, -29.8, -25.6, 0, 25.6] / 100;
+%pulse_coherences = [-78.8, -51.2, -42.6, -36.2, 0]/100;
 %galvanic_coherences = [-100, -75.6, -51.2, -25.6, 0, 25.6] / 100;
 %pulse_coherences = [-100, -90, -78.8, -75.6, -51.2, -25.6, 0] / 100;
 %galvanic_coherences = [-100, -90, -78.8, -75.6, -51.2, -25.6, 0] / 100;
 %pulse_coherences = [-100, -90, -78.8, -51.2, -25.6, 0] / 100;
 %galvanic_coherences = [-100, -90, -78.8, -51.2, -25.6, 0] / 100; %omit 75.6% bc I forgot to change f-->0.15
-%control_coherences = [0];
-%galvanic_coherences = [0];
+%control_coherences = [-100, -51.2, -25.6, 0, 25.6]/100;
+%galvanic_coherences = [-100, -51.2, -25.6, 0, 25.6]/100;
+%pulse_coherences = [-100, -51.2, -25.6, 0, 25.6]/100;
+
+%control_coherences = [-100, -51.2, -25.6, 0, 25.6]./100;
+%pulse_coherences = [-100, -65, -55, -45, -25.6, 0, 25.6]./100;
+%galvanic_coherences = [-100, -65, -55, -45, -25.6, 0, 25.6]./100;
+
+control_coherences = [-100, -51.2, -25.6, -12.8, 0, 12.8, 25.6, 51.2]./100;
+pulse_coherences = [-100, -65, -55, -51.2, -45, -26.6, 0, 25.6]./100;
+galvanic_coherences = [-100, -65, -55, -51.2, -45, -25.6, 0, 25.6]./100;
+
+%control_coherences = 0;
+%galvanic_coherences = 0;
+%pulse_coherences = 0;
+
 pulse_amps = [-10*1e-6];
-dc_amps = [-40, 0]*1e-9;
+dc_amps = [-1400, 0]*1e-9;
 stim_amps = [pulse_amps, dc_amps];
 %}
 
@@ -151,14 +165,13 @@ for brain = brains
             coherent_fin_decs = final_decisions(final_decisions(:, i)~=0, i);
             avg_final_acc(i) = sum(coherent_fin_decs == 1) / length(coherent_fin_decs);
             
-            %{
             if stim_amp == 0 %batch for control
+                batch_size = floor(length(coherent_fin_decs) / num_batch);
                 for batch = 1:num_batch
                     batch_idx = 1+(batch-1)*batch_size:batch*batch_size;
                     batch_final_acc(i, batch) = sum(coherent_fin_decs(batch_idx)==1) / batch_size;
                 end
             end
-            %}
 
             %Breakdown DTs by outcome
             avg_correct_dts(i) = mean(coherent_times(coherent_decisions==1));

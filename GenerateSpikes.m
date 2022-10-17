@@ -13,13 +13,15 @@ function GenerateSpikes(fr_bg, max_fr_task, coherences, f, N_E, N_I, t_task, ...
     for c = coherences
         fr_task1 = max_fr_task/2*(1 + c);
         fr_task2 = max_fr_task/2*(1 - c);
-        fr_tot1 = fr_bg + fr_task1;
-        fr_tot2 = fr_bg + fr_task2;
+        r0 = fr_bg;
+        m = 0.5;
+        f0 = 40;
+        fr = ones(length(t), N) .* (r0 * (1 + m*cos(2*pi*f0*t'))); %Instaneous Firing Rate
+        fr(time_idx, g1_idx) = fr(time_idx, g1_idx) + fr_task1;
+        fr(time_idx, g2_idx) = fr(time_idx, g2_idx) + fr_task2;
         for trial = start_trial:end_trial
             rng(trial);
-            spikes = rand(length(t), N) < (dt*fr_bg);
-            spikes(time_idx, g1_idx) = rand(sum(time_idx), num_group) < (dt*fr_tot1);
-            spikes(time_idx, g2_idx) = rand(sum(time_idx), num_group) < (dt*fr_tot2);
+            spikes = rand(length(t), N) < (dt*fr);
             basepath = sprintf("/spikes/c=%0.3f/trial%0.0f", [c, trial]);
             spikepath = strcat(sim_path, basepath);
             mkdir(spikepath)
