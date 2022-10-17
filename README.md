@@ -1,5 +1,5 @@
 # bam_microstim
-This projects adds microstimulation to the Wang 2002 Biophysical Attractor Model of decision-making.  A conference paper describing this work was recently accepted by the Engineering in Medicine and Biology Society, which can be [here](https://github.com/pauladkisson/bam_microstim/blob/main/embc_2022_PaulAdkisson.pdf). 
+This projects adds microstimulation to the Wang 2002 Biophysical Attractor Model of decision-making.  A conference paper describing this work was recently accepted by the Engineering in Medicine and Biology Society, which can be found [here](https://ieeexplore.ieee.org/abstract/document/9871812). 
 
 ## Description of Project Organization
 The project is generally run by 4 code scripts:
